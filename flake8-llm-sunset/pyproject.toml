@@ -8,7 +8,24 @@ version = "0.0.1"
 description = "A flake8 plugin that warns about expiring LLM model IDs"
 readme = "README.md"
 requires-python = ">=3.10"
+license = { text = "MIT License" }
+authors = [{ name = "nikkie", email = "takuyafjp+develop@gmail.com" }]
+keywords = ["flake8"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
 dependencies = ["flake8>=7"]
+
+[project.urls]
+Repository = "https://github.com/ftnext/llm-sunset-lint"
 
 [project.entry-points."flake8.extension"]
 LLS = "flake8_llm_sunset:ModelExpiryChecker"
