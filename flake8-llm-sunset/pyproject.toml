@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flake8-llm-sunset"
+version = "0.0.1"
+description = "A flake8 plugin that warns about expiring LLM model IDs"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["flake8>=7"]
+
+[project.entry-points."flake8.extension"]
+LLS = "flake8_llm_sunset:ModelExpiryChecker"
+
+[project.optional-dependencies]
+test = ["pytest>=9"]
+
+[tool.pytest]
+testpaths = ["tests"]
