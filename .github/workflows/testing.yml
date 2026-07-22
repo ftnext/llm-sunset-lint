@@ -17,9 +17,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
+        working-directory: flake8-llm-sunset
         run: |
           python -m pip install -U pip
           python -m pip install .[test]
       - name: Run tests
+        working-directory: flake8-llm-sunset
         run: |
           pytest -v

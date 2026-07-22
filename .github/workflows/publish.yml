@@ -18,8 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Build package
+        working-directory: flake8-llm-sunset
         run: |
           pipx run build
           pipx run twine check dist/*
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
+        working-directory: flake8-llm-sunset
