@@ -24,4 +24,5 @@ jobs:
           pipx run twine check dist/*
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
-        working-directory: flake8-llm-sunset
+        with:
+          packages-dir: flake8-llm-sunset/dist/
