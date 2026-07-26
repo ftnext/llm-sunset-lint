@@ -6,6 +6,16 @@ Gemini and other Google model retirement dates are sourced from Google Cloud's
 [Model versions and lifecycle (Markdown source)](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions.md.txt).
 Models without an announced retirement date are not checked.
 
+## Error codes
+
+| Code | Description |
+| --- | --- |
+| `LLS001` | The model has reached or passed its announced retirement date. |
+| `LLS002` | The model is within one calendar month of its announced retirement date. |
+
+On the announced retirement date, the diagnostic changes from `LLS002` to
+`LLS001`.
+
 ## Install
 
 ```console

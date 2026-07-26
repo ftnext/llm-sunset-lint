@@ -124,11 +124,13 @@ class ModelExpiryChecker:
                         f"shuts down on {shutdown.isoformat()} ({days} days remaining)"
                     )
 
+                code = "LLS001" if current_date >= shutdown else "LLS002"
+
                 # col_offset points to the opening quote; the exact offset inside a
                 # string is deliberately not reconstructed from source spelling.
                 yield (
                     node.lineno,
                     node.col_offset,
-                    f"LLS001 {model_family(model)} model '{model}' {status}",
+                    f"{code} {model_family(model)} model '{model}' {status}",
                     type(self),
                 )
