@@ -8,13 +8,21 @@ Models without an announced retirement date are not checked.
 
 ## Error codes
 
+Error-code prefixes identify the model provider:
+
+| Prefix | Provider | Status |
+| --- | --- | --- |
+| `LSG` | Google | Supported |
+| `LSO` | OpenAI | Planned |
+| `LSA` | Anthropic | Planned |
+
 | Code | Description |
 | --- | --- |
-| `LLS001` | The model has reached or passed its announced retirement date. |
-| `LLS002` | The model is within one calendar month of its announced retirement date. |
+| `LSG001` | A Google model has reached or passed its announced retirement date. |
+| `LSG002` | A Google model is within one calendar month of its announced retirement date. |
 
-On the announced retirement date, the diagnostic changes from `LLS002` to
-`LLS001`.
+On the announced retirement date, the diagnostic changes from `LSG002` to
+`LSG001`.
 
 ## Install
 
@@ -25,6 +33,6 @@ $ uv tool install flake8 --with flake8-llm-sunset
 ## Usage
 
 ```console
-% flake8 --select LLS examples/adk_example_fields_output_schema_agent.py
-examples/adk_example_fields_output_schema_agent.py:14:11: LLS001 Gemini model 'gemini-2.0-flash' was shut down on 2026-06-01
+% flake8 --select LSG examples/adk_example_fields_output_schema_agent.py
+examples/adk_example_fields_output_schema_agent.py:14:11: LSG001 Gemini model 'gemini-2.0-flash' was shut down on 2026-06-01
 ```

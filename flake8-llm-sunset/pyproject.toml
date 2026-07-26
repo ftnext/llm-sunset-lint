@@ -28,7 +28,7 @@ dependencies = ["flake8>=7"]
 Repository = "https://github.com/ftnext/llm-sunset-lint"
 
 [project.entry-points."flake8.extension"]
-LLS = "flake8_llm_sunset:ModelExpiryChecker"
+LSG = "flake8_llm_sunset:ModelExpiryChecker"
 
 [project.optional-dependencies]
 test = ["pytest>=9"]

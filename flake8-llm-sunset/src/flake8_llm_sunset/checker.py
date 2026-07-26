@@ -9,6 +9,8 @@ from datetime import date
 from typing import Iterator
 
 
+ERROR_CODE_PREFIX = "LSG"
+
 # Source:
 # https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions.md.txt
 # Models whose retirement date has not been announced are omitted. The Markdown
@@ -124,7 +126,8 @@ class ModelExpiryChecker:
                         f"shuts down on {shutdown.isoformat()} ({days} days remaining)"
                     )
 
-                code = "LLS001" if current_date >= shutdown else "LLS002"
+                code_number = "001" if current_date >= shutdown else "002"
+                code = f"{ERROR_CODE_PREFIX}{code_number}"
 
                 # col_offset points to the opening quote; the exact offset inside a
                 # string is deliberately not reconstructed from source spelling.
