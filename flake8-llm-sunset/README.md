@@ -1,5 +1,18 @@
 # flake8-llm-sunset
 
+## Install
+
+```console
+$ uv tool install flake8 --with flake8-llm-sunset
+```
+
+## Usage
+
+```console
+% flake8 --select LSG examples/adk_example_fields_output_schema_agent.py
+examples/adk_example_fields_output_schema_agent.py:14:11: LSG001 Gemini model 'gemini-2.0-flash' was shut down on 2026-06-01
+```
+
 ## Model lifecycle data
 
 Gemini and other Google model retirement dates are sourced from Google Cloud's
@@ -23,16 +36,3 @@ Error-code prefixes identify the model provider:
 
 On the announced retirement date, the diagnostic changes from `LSG002` to
 `LSG001`.
-
-## Install
-
-```console
-$ uv tool install flake8 --with flake8-llm-sunset
-```
-
-## Usage
-
-```console
-% flake8 --select LSG examples/adk_example_fields_output_schema_agent.py
-examples/adk_example_fields_output_schema_agent.py:14:11: LSG001 Gemini model 'gemini-2.0-flash' was shut down on 2026-06-01
-```
