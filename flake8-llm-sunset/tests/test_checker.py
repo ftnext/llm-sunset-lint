@@ -51,6 +51,45 @@ def test_distinguishes_earliest_possible_shutdown_date():
     )
 
 
+def test_warns_for_veo_model_from_expanded_markdown_section():
+    errors = check('MODEL = "veo-3.0-generate-001"', date(2026, 6, 1))
+
+    assert errors[0][2] == (
+        "LLS001 Veo model 'veo-3.0-generate-001' shuts down on 2026-06-30 "
+        "(29 days remaining)"
+    )
+
+
+def test_distinguishes_earliest_possible_veo_shutdown_date():
+    errors = check('MODEL = "veo-3.1-fast-generate-001"', date(2026, 10, 17))
+
+    assert errors[0][2] == (
+        "LLS001 Veo model 'veo-3.1-fast-generate-001' may shut down on or after "
+        "2026-11-17"
+    )
+
+
+def test_warns_for_embedding_model():
+    errors = check('MODEL = "text-embedding-005"', date(2027, 3, 1))
+
+    assert errors[0][2] == (
+        "LLS001 Google model 'text-embedding-005' shuts down on 2027-04-01 "
+        "(31 days remaining)"
+    )
+
+
+def test_warns_for_retired_model_from_expanded_markdown_section():
+    errors = check('MODEL = "textembedding-gecko@003"', date(2025, 6, 1))
+
+    assert errors[0][2] == (
+        "LLS001 Google model 'textembedding-gecko@003' "
+        "was shut down on 2025-05-24"
+    )
+
+
 def test_ignores_unknown_or_no_shutdown_date_model():
-    source = 'MODELS = ["gemini-3.6-flash", "gemini-something-new"]'
+    source = (
+        'MODELS = ["gemini-3.6-flash", "gemini-3.1-flash-lite-image", '
+        '"gemini-something-new"]'
+    )
     assert check(source, date(2030, 1, 1)) == []

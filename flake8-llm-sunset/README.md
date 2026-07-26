@@ -1,5 +1,11 @@
 # flake8-llm-sunset
 
+## Model lifecycle data
+
+Gemini and other Google model retirement dates are sourced from Google Cloud's
+[Model versions and lifecycle (Markdown source)](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions.md.txt).
+Models without an announced retirement date are not checked.
+
 ## Install
 
 ```console
