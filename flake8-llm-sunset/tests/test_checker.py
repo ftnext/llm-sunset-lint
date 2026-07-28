@@ -1,6 +1,8 @@
 import ast
 from datetime import date
 
+import pytest
+
 from flake8_llm_sunset import ModelExpiryChecker
 
 
@@ -17,6 +19,22 @@ def test_warns_one_calendar_month_before_shutdown():
     assert errors[0][2] == (
         "LSG002 Gemini model 'gemini-2.5-flash' shuts down on 2026-10-16 "
         "(30 days remaining)"
+    )
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        "gemini-flash-latest",
+        "gemini-flash-lite-latest",
+    ],
+)
+def test_warns_for_latest_aliases_shutting_down_on_august_31(model):
+    errors = check(f'MODEL = "{model}"', date(2026, 7, 31))
+
+    assert errors[0][2] == (
+        f"LSG002 Gemini model '{model}' shuts down on 2026-08-31 "
+        "(31 days remaining)"
     )
 
 

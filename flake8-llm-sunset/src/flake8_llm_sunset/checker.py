@@ -16,6 +16,8 @@ ERROR_CODE_PREFIX = "LSG"
 # Models whose retirement date has not been announced are omitted. The Markdown
 # source is used because it includes the contents of collapsed tabs and sections.
 MODEL_SHUTDOWNS = {
+    "gemini-flash-latest": date(2026, 8, 31),
+    "gemini-flash-lite-latest": date(2026, 8, 31),
     "gemini-3.5-flash": date(2027, 5, 19),
     "gemini-3.5-flash-lite": date(2027, 7, 21),
     "gemini-3.1-flash-lite": date(2027, 5, 7),
