@@ -13,6 +13,8 @@ ERROR_CODE_PREFIX = "LSG"
 
 # Source:
 # https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions.md.txt
+# Discontinued preview image endpoints:
+# https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-pro-image-preview.md.txt
 # Models whose retirement date has not been announced are omitted. The Markdown
 # source is used because it includes the contents of collapsed tabs and sections.
 MODEL_SHUTDOWNS = {
@@ -27,6 +29,8 @@ MODEL_SHUTDOWNS = {
     "gemini-2.5-flash-lite": date(2026, 10, 16),
     "gemini-3.1-flash-image": date(2027, 5, 28),
     "gemini-3-pro-image": date(2027, 5, 28),
+    "gemini-3.1-flash-image-preview": date(2026, 7, 17),
+    "gemini-3-pro-image-preview": date(2026, 7, 17),
     "gemini-2.5-flash-image": date(2026, 10, 2),
     "veo-3.1-generate-001": date(2026, 11, 17),
     "veo-3.1-fast-generate-001": date(2026, 11, 17),

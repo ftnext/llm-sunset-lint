@@ -76,6 +76,21 @@ def test_finds_model_inside_larger_string():
     assert len(errors) == 1
 
 
+@pytest.mark.parametrize(
+    "model",
+    [
+        "gemini-3.1-flash-image-preview",
+        "gemini-3-pro-image-preview",
+    ],
+)
+def test_warns_for_discontinued_preview_image_endpoint(model):
+    errors = check(f'MODEL = "{model}"', date(2026, 7, 17))
+
+    assert errors[0][2] == (
+        f"LSG001 Gemini model '{model}' was shut down on 2026-07-17"
+    )
+
+
 def test_distinguishes_earliest_possible_shutdown_date():
     errors = check('MODEL = "gemini-3.5-flash"', date(2027, 4, 19))
 
