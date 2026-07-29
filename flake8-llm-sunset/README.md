@@ -16,8 +16,15 @@ examples/adk_example_fields_output_schema_agent.py:14:11: LSG001 Gemini model 'g
 ## Model lifecycle data
 
 Gemini and other Google model retirement dates are sourced from Google Cloud's
-[Model versions and lifecycle (Markdown source)](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions.md.txt).
+[Model versions and lifecycle](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions.md.txt)
+and [Google models](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/google-models.md.txt)
+Markdown sources.
 Models without an announced retirement date are not checked.
+
+The two upstream Markdown documents are also stored under
+`sources/google-cloud/` for maintenance. Run
+`python scripts/fetch_markdown_sources.py` to refresh them. These snapshots are
+not included in the Python package or its source distribution.
 
 ## Error codes
 

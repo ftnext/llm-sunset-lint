@@ -14,7 +14,8 @@ ERROR_CODE_PREFIX = "LSG"
 # Source:
 # https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions.md.txt
 # Discontinued preview image endpoints:
-# https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-pro-image-preview.md.txt
+# https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/google-models.md.txt
+# Repository snapshots of both documents are kept under sources/google-cloud/.
 # Models whose retirement date has not been announced are omitted. The Markdown
 # source is used because it includes the contents of collapsed tabs and sections.
 MODEL_SHUTDOWNS = {
