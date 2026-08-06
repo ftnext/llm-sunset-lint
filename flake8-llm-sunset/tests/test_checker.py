@@ -13,11 +13,11 @@ def check(source: str, today: date):
 
 
 def test_warns_one_calendar_month_before_shutdown():
-    errors = check('MODEL = "gemini-2.5-flash"', date(2026, 9, 16))
+    errors = check('MODEL = "gemini-2.5-flash"', date(2026, 9, 20))
 
     assert len(errors) == 1
     assert errors[0][2] == (
-        "LSG002 Gemini model 'gemini-2.5-flash' shuts down on 2026-10-16 "
+        "LSG002 Gemini model 'gemini-2.5-flash' shuts down on 2026-10-20 "
         "(30 days remaining)"
     )
 
@@ -39,7 +39,7 @@ def test_warns_for_latest_aliases_shutting_down_on_august_31(model):
 
 
 def test_does_not_warn_before_warning_window():
-    assert check('MODEL = "gemini-2.5-flash"', date(2026, 9, 15)) == []
+    assert check('MODEL = "gemini-2.5-flash"', date(2026, 9, 19)) == []
 
 
 def test_warns_for_already_shutdown_model():
@@ -54,16 +54,16 @@ def test_warns_for_already_shutdown_model():
 
 
 def test_uses_upcoming_code_until_day_before_shutdown():
-    errors = check('MODEL = "gemini-2.5-flash"', date(2026, 10, 15))
+    errors = check('MODEL = "gemini-2.5-flash"', date(2026, 10, 19))
 
     assert errors[0][2].startswith("LSG002 ")
 
 
 def test_uses_shutdown_code_on_shutdown_date():
-    errors = check('MODEL = "gemini-2.5-flash"', date(2026, 10, 16))
+    errors = check('MODEL = "gemini-2.5-flash"', date(2026, 10, 20))
 
     assert errors[0][2] == (
-        "LSG001 Gemini model 'gemini-2.5-flash' was shut down on 2026-10-16"
+        "LSG001 Gemini model 'gemini-2.5-flash' was shut down on 2026-10-20"
     )
 
 
