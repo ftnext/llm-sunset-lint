@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   issues: write
 
 concurrency:
@@ -22,6 +22,8 @@ jobs:
         working-directory: flake8-llm-sunset
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -30,33 +32,66 @@ jobs:
       - name: Download Markdown sources
         run: python scripts/fetch_markdown_sources.py
 
-      - name: Open an issue when sources change
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Save source changes
+        id: changes
         shell: bash
         run: |
-          if [[ -z "$(git status --porcelain -- sources/google-cloud)" ]]; then
+          git add -- sources/google-cloud
+          if git diff --cached --quiet -- sources/google-cloud; then
             echo "Upstream sources are unchanged."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
+          diff_file="$RUNNER_TEMP/upstream-sources.diff"
+          git diff --cached --no-ext-diff -- sources/google-cloud > "$diff_file"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "diff_file=$diff_file" >> "$GITHUB_OUTPUT"
+
+      - name: Install test dependencies
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          python -m pip install -U pip
+          python -m pip install .[test]
+
+      - name: Run tests
+        if: steps.changes.outputs.changed == 'true'
+        run: pytest -v
+
+      - name: Commit and push source changes
+        if: steps.changes.outputs.changed == 'true'
+        id: commit
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update upstream Markdown sources"
+          git push origin HEAD:main
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Open an issue for source changes
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_SHA: ${{ steps.commit.outputs.sha }}
+          DIFF_FILE: ${{ steps.changes.outputs.diff_file }}
+        shell: bash
+        run: |
           issue_title="Upstream Markdown sources changed"
-          open_issue_count="$(
-            gh issue list \
-              --state open \
-              --json title \
-              --jq "map(select(.title == \"$issue_title\")) | length"
-          )"
-          if [[ "$open_issue_count" != "0" ]]; then
-            echo "An open notification issue already exists."
-            exit 0
-          fi
-
-          changed_files="$(git diff --name-only -- sources/google-cloud)"
           run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          commit_url="${{ github.server_url }}/${{ github.repository }}/commit/$COMMIT_SHA"
+          body_file="$RUNNER_TEMP/upstream-sources-issue.md"
+          {
+            printf '%s\n\n' '@ftnext The upstream Markdown sources changed and were committed to `main`.'
+            printf '%s\n' "- Commit: $commit_url"
+            printf '%s\n\n' "- Workflow run: $run_url"
+            printf '%s\n\n' '## Diff'
+            printf '%s\n' '```diff'
+            cat "$DIFF_FILE"
+            printf '%s\n' '```'
+          } > "$body_file"
+
           gh issue create \
             --title "$issue_title" \
-            --body "$(printf '%s\n\n%s\n\n```text\n%s\n```' \
-              'The upstream model documentation differs from the repository snapshots.' \
-              "Review the source changes and update the package as needed: $run_url" \
-              "$changed_files")"
+            --assignee ftnext \
+            --body-file "$body_file"
