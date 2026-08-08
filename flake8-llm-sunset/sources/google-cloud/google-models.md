@@ -1,8 +1,8 @@
+<br />
+
 ## Featured Gemini models
 
-
 3.6 Flash
-
 
 Enhanced efficiency and practical reasoning, helping you build and iterate with greater ease
 
@@ -10,9 +10,7 @@ Enhanced efficiency and practical reasoning, helping you build and iterate with 
 - More reliable code generation
 - Stronger multimodal reasoning
 
-[](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-6-flash)
-3.5 Flash-Lite
-
+[](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-6-flash) 3.5 Flash-Lite
 
 Our fast, budget-friendly way to power your everyday applications
 
@@ -20,9 +18,7 @@ Our fast, budget-friendly way to power your everyday applications
 - Capable tool orchestration
 - Precise document understanding
 
-[](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite)
-3.1 Flash Image
-
+[](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite) 3.1 Flash Image
 
 Turn ideas into production-ready assets
 
@@ -64,123 +60,11 @@ music_note_spark [Lyria 3 Pro](https://docs.cloud.google.com/gemini-enterprise-a
 
 ### Gemini
 
+All the Gemini models can understand and respond in the following languages:
 
-All the Gemini models can understand and respond in the
-following languages:
-
-
-Afrikaans (`af`),
-Albanian (`sq`),
-Amharic (`am`),
-Arabic (`ar`),
-Armenian (`hy`),
-Assamese (`as`),
-Azerbaijani (`az`),
-Basque (`eu`),
-Belarusian (`be`),
-Bengali (`bn`),
-Bosnian (`bs`),
-Bulgarian (`bg`),
-Catalan (`ca`),
-Cebuano (`ceb`),
-Chinese (Simplified and Traditional) (`zh`),
-Corsican (`co`),
-Croatian (`hr`),
-Czech (`cs`),
-Danish (`da`),
-Dhivehi (`dv`),
-Dutch (`nl`),
-English (`en`),
-Esperanto (`eo`),
-Estonian (`et`),
-Filipino (Tagalog) (`fil`),
-Finnish (`fi`),
-French (`fr`),
-Frisian (`fy`),
-Galician (`gl`),
-Georgian (`ka`),
-German (`de`),
-Greek (`el`),
-Gujarati (`gu`),
-Haitian Creole (`ht`),
-Hausa (`ha`),
-Hawaiian (`haw`),
-Hebrew (`iw`),
-Hindi (`hi`),
-Hmong (`hmn`),
-Hungarian (`hu`),
-Icelandic (`is`),
-Igbo (`ig`),
-Indonesian (`id`),
-Irish (`ga`),
-Italian (`it`),
-Japanese (`ja`),
-Javanese (`jv`),
-Kannada (`kn`),
-Kazakh (`kk`),
-Khmer (`km`),
-Korean (`ko`),
-Krio (`kri`),
-Kurdish (`ku`),
-Kyrgyz (`ky`),
-Lao (`lo`),
-Latin (`la`),
-Latvian (`lv`),
-Lithuanian (`lt`),
-Luxembourgish (`lb`),
-Macedonian (`mk`),
-Malagasy (`mg`),
-Malay (`ms`),
-Malayalam (`ml`),
-Maltese (`mt`),
-Maori (`mi`),
-Marathi (`mr`),
-Meiteilon (Manipuri) (`mni-Mtei`),
-Mongolian (`mn`),
-Myanmar (Burmese) (`my`),
-Nepali (`ne`),
-Norwegian (`no`),
-Nyanja (Chichewa) (`ny`),
-Odia (Oriya) (`or`),
-Pashto (`ps`),
-Persian (`fa`),
-Polish (`pl`),
-Portuguese (`pt`),
-Punjabi (`pa`),
-Romanian (`ro`),
-Russian (`ru`),
-Samoan (`sm`),
-Scots Gaelic (`gd`),
-Serbian (`sr`),
-Sesotho (`st`),
-Shona (`sn`),
-Sindhi (`sd`),
-Sinhala (Sinhalese) (`si`),
-Slovak (`sk`),
-Slovenian (`sl`),
-Somali (`so`),
-Spanish (`es`),
-Sundanese (`su`),
-Swahili (`sw`),
-Swedish (`sv`),
-Tajik (`tg`),
-Tamil (`ta`),
-Telugu (`te`),
-Thai (`th`),
-Turkish (`tr`),
-Ukrainian (`uk`),
-Urdu (`ur`),
-Uyghur (`ug`),
-Uzbek (`uz`),
-Vietnamese (`vi`),
-Welsh (`cy`),
-Xhosa (`xh`),
-Yiddish (`yi`),
-Yoruba (`yo`),
-and Zulu (`zu`).
+Afrikaans (`af`), Albanian (`sq`), Amharic (`am`), Arabic (`ar`), Armenian (`hy`), Assamese (`as`), Azerbaijani (`az`), Basque (`eu`), Belarusian (`be`), Bengali (`bn`), Bosnian (`bs`), Bulgarian (`bg`), Catalan (`ca`), Cebuano (`ceb`), Chinese (Simplified and Traditional) (`zh`), Corsican (`co`), Croatian (`hr`), Czech (`cs`), Danish (`da`), Dhivehi (`dv`), Dutch (`nl`), English (`en`), Esperanto (`eo`), Estonian (`et`), Filipino (Tagalog) (`fil`), Finnish (`fi`), French (`fr`), Frisian (`fy`), Galician (`gl`), Georgian (`ka`), German (`de`), Greek (`el`), Gujarati (`gu`), Haitian Creole (`ht`), Hausa (`ha`), Hawaiian (`haw`), Hebrew (`iw`), Hindi (`hi`), Hmong (`hmn`), Hungarian (`hu`), Icelandic (`is`), Igbo (`ig`), Indonesian (`id`), Irish (`ga`), Italian (`it`), Japanese (`ja`), Javanese (`jv`), Kannada (`kn`), Kazakh (`kk`), Khmer (`km`), Korean (`ko`), Krio (`kri`), Kurdish (`ku`), Kyrgyz (`ky`), Lao (`lo`), Latin (`la`), Latvian (`lv`), Lithuanian (`lt`), Luxembourgish (`lb`), Macedonian (`mk`), Malagasy (`mg`), Malay (`ms`), Malayalam (`ml`), Maltese (`mt`), Maori (`mi`), Marathi (`mr`), Meiteilon (Manipuri) (`mni-Mtei`), Mongolian (`mn`), Myanmar (Burmese) (`my`), Nepali (`ne`), Norwegian (`no`), Nyanja (Chichewa) (`ny`), Odia (Oriya) (`or`), Pashto (`ps`), Persian (`fa`), Polish (`pl`), Portuguese (`pt`), Punjabi (`pa`), Romanian (`ro`), Russian (`ru`), Samoan (`sm`), Scots Gaelic (`gd`), Serbian (`sr`), Sesotho (`st`), Shona (`sn`), Sindhi (`sd`), Sinhala (Sinhalese) (`si`), Slovak (`sk`), Slovenian (`sl`), Somali (`so`), Spanish (`es`), Sundanese (`su`), Swahili (`sw`), Swedish (`sv`), Tajik (`tg`), Tamil (`ta`), Telugu (`te`), Thai (`th`), Turkish (`tr`), Ukrainian (`uk`), Urdu (`ur`), Uyghur (`ug`), Uzbek (`uz`), Vietnamese (`vi`), Welsh (`cy`), Xhosa (`xh`), Yiddish (`yi`), Yoruba (`yo`), and Zulu (`zu`).
 
 ### Gemma
-
 
 Gemma and Gemma 2 support only the English (`en`) language. Gemma 3 and Gemma 3n provide multilingual support in over 140 languages.
 
@@ -188,123 +72,16 @@ Gemma and Gemma 2 support only the English (`en`) language. Gemma 3 and Gemma 3n
 
 Multilingual text embedding models support the following languages:
 
-
-Afrikaans (`af`),
-Albanian (`sq`),
-Amharic (`am`),
-Arabic (`ar`),
-Armenian (`hy`),
-Azerbaijani (`az`),
-Basque (`eu`),
-Belarusian (`be`),
-Bengali (`bn`),
-Bulgarian (`bg`),
-Catalan (`ca`),
-Cebuano (`ceb`),
-Chinese (Simplified and Traditional) (`zh`),
-Corsican (`co`),
-Czech (`cs`),
-Danish (`da`),
-Dutch (`nl`),
-English (`en`),
-Esperanto (`eo`),
-Estonian (`et`),
-Filipino (Tagalog) (`fil`),
-Finnish (`fi`),
-French (`fr`),
-Frisian (`fy`),
-Galician (`gl`),
-Georgian (`ka`),
-German (`de`),
-Greek (`el`),
-Gujarati (`gu`),
-Haitian Creole (`ht`),
-Hausa (`ha`),
-Hawaiian (`haw`),
-Hebrew (`iw`),
-Hindi (`hi`),
-Hmong (`hmn`),
-Hungarian (`hu`),
-Icelandic (`is`),
-Igbo (`ig`),
-Indonesian (`id`),
-Irish (`ga`),
-Italian (`it`),
-Japanese (`ja`),
-Javanese (`jv`),
-Kannada (`kn`),
-Kazakh (`kk`),
-Khmer (`km`),
-Korean (`ko`),
-Kurdish (`ku`),
-Kyrgyz (`ky`),
-Lao (`lo`),
-Latin (`la`),
-Latvian (`lv`),
-Lithuanian (`lt`),
-Luxembourgish (`lb`),
-Macedonian (`mk`),
-Malagasy (`mg`),
-Malay (`ms`),
-Malayalam (`ml`),
-Maltese (`mt`),
-Maori (`mi`),
-Marathi (`mr`),
-Mongolian (`mn`),
-Myanmar (Burmese) (`my`),
-Nepali (`ne`),
-Nyanja (Chichewa) (`ny`),
-Norwegian (`no`),
-Pashto (`ps`),
-Persian (`fa`),
-Polish (`pl`),
-Portuguese (`pt`),
-Punjabi (`pa`),
-Romanian (`ro`),
-Russian (`ru`),
-Samoan (`sm`),
-Scots Gaelic (`gd`),
-Serbian (`sr`),
-Sesotho (`st`),
-Shona (`sn`),
-Sindhi (`sd`),
-Sinhala (Sinhalese) (`si`),
-Slovak (`sk`),
-Slovenian (`sl`),
-Somali (`so`),
-Spanish (`es`),
-Sundanese (`su`),
-Swahili (`sw`),
-Swedish (`sv`),
-Tajik (`tg`),
-Tamil (`ta`),
-Telugu (`te`),
-Thai (`th`),
-Turkish (`tr`),
-Ukrainian (`uk`),
-Urdu (`ur`),
-Uzbek (`uz`),
-Vietnamese (`vi`),
-Welsh (`cy`),
-Xhosa (`xh`),
-Yiddish (`yi`),
-Yoruba (`yo`),
-and Zulu (`zu`).
+Afrikaans (`af`), Albanian (`sq`), Amharic (`am`), Arabic (`ar`), Armenian (`hy`), Azerbaijani (`az`), Basque (`eu`), Belarusian (`be`), Bengali (`bn`), Bulgarian (`bg`), Catalan (`ca`), Cebuano (`ceb`), Chinese (Simplified and Traditional) (`zh`), Corsican (`co`), Czech (`cs`), Danish (`da`), Dutch (`nl`), English (`en`), Esperanto (`eo`), Estonian (`et`), Filipino (Tagalog) (`fil`), Finnish (`fi`), French (`fr`), Frisian (`fy`), Galician (`gl`), Georgian (`ka`), German (`de`), Greek (`el`), Gujarati (`gu`), Haitian Creole (`ht`), Hausa (`ha`), Hawaiian (`haw`), Hebrew (`iw`), Hindi (`hi`), Hmong (`hmn`), Hungarian (`hu`), Icelandic (`is`), Igbo (`ig`), Indonesian (`id`), Irish (`ga`), Italian (`it`), Japanese (`ja`), Javanese (`jv`), Kannada (`kn`), Kazakh (`kk`), Khmer (`km`), Korean (`ko`), Kurdish (`ku`), Kyrgyz (`ky`), Lao (`lo`), Latin (`la`), Latvian (`lv`), Lithuanian (`lt`), Luxembourgish (`lb`), Macedonian (`mk`), Malagasy (`mg`), Malay (`ms`), Malayalam (`ml`), Maltese (`mt`), Maori (`mi`), Marathi (`mr`), Mongolian (`mn`), Myanmar (Burmese) (`my`), Nepali (`ne`), Nyanja (Chichewa) (`ny`), Norwegian (`no`), Pashto (`ps`), Persian (`fa`), Polish (`pl`), Portuguese (`pt`), Punjabi (`pa`), Romanian (`ro`), Russian (`ru`), Samoan (`sm`), Scots Gaelic (`gd`), Serbian (`sr`), Sesotho (`st`), Shona (`sn`), Sindhi (`sd`), Sinhala (Sinhalese) (`si`), Slovak (`sk`), Slovenian (`sl`), Somali (`so`), Spanish (`es`), Sundanese (`su`), Swahili (`sw`), Swedish (`sv`), Tajik (`tg`), Tamil (`ta`), Telugu (`te`), Thai (`th`), Turkish (`tr`), Ukrainian (`uk`), Urdu (`ur`), Uzbek (`uz`), Vietnamese (`vi`), Welsh (`cy`), Xhosa (`xh`), Yiddish (`yi`), Yoruba (`yo`), and Zulu (`zu`).
 
 ## Explore all models in Model Garden
 
-Model Garden is a platform that helps you discover, test, customize,
-and deploy Google proprietary and select OSS models and assets. To explore
-the generative AI models and APIs that are available on Gemini Enterprise Agent Platform, go to
-Model Garden in the Google Cloud console.
+Model Garden is a platform that helps you discover, test, customize, and deploy Google proprietary and select OSS models and assets. To explore the generative AI models and APIs that are available on Gemini Enterprise Agent Platform, go to Model Garden in the Google Cloud console.
 
 [Go to Model Garden](https://console.cloud.google.com/agent-platform/model-garden)
 
-To learn more about Model Garden, including available models and
-capabilities, see
-[Explore AI models in Model Garden](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-garden/explore-models).
+To learn more about Model Garden, including available models and capabilities, see [Explore AI models in Model Garden](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-garden/explore-models).
 
 ## Model versions
 
-To see all model versions, including legacy and retired models, see
-[Model versions and lifecycle](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions).
+To see all model versions, including legacy and retired models, see [Model versions and lifecycle](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions).
