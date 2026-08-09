@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: write
   issues: write
 
@@ -71,6 +72,7 @@ jobs:
 
       - name: Open an issue for source changes
         if: steps.changes.outputs.changed == 'true'
+        id: issue
         env:
           GH_TOKEN: ${{ github.token }}
           COMMIT_SHA: ${{ steps.commit.outputs.sha }}
@@ -91,7 +93,25 @@ jobs:
             printf '%s\n' '```'
           } > "$body_file"
 
-          gh issue create \
+          issue_url=$(gh issue create \
             --title "$issue_title" \
-            --assignee ftnext \
-            --body-file "$body_file"
+            --body-file "$body_file")
+          issue_number="${issue_url##*/}"
+          if [[ ! "$issue_number" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Could not parse the issue number from: $issue_url" >&2
+            exit 1
+          fi
+          echo "issue_number=$issue_number" >> "$GITHUB_OUTPUT"
+
+      - name: Request Copilot review
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_SHA: ${{ steps.commit.outputs.sha }}
+          ISSUE_NUMBER: ${{ steps.issue.outputs.issue_number }}
+        shell: bash
+        run: |
+          gh workflow run review-upstream-markdown-changes.yml \
+            --ref main \
+            --field issue_number="$ISSUE_NUMBER" \
+            --field commit_sha="$COMMIT_SHA"
