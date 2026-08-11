@@ -34,7 +34,7 @@ The following table lists the models that will be available for at least 12 mont
 |---|---|---|---|
 | `gemini-3.1-flash-image` | May 28, 2026 | May 28, 2027 or later |   |
 | `gemini-3-pro-image` | May 28, 2026 | May 28, 2027 or later |   |
-| `gemini-2.5-flash-image` | October 2, 2025 | October 2, 2026 |   |
+| `gemini-2.5-flash-image` | October 2, 2025 | October 2, 2026 | Gemini 3.1 Flash-Lite Image |
 
 <br />
 
