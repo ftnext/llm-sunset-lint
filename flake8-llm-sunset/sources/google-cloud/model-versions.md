@@ -4,15 +4,17 @@ This document defines key terms related to the lifecycle stages and important da
 
 ## Latest available models
 
-The following tables list the available models and their retirement dates. While retirement timelines may be extended, they won't be moved to an earlier date than what is listed.
+The following tables list the available models and their retirement dates. While
+retirement timelines may be extended, they won't be moved to an earlier date
+than what is listed.
 
 ### Models available for at least 12 months after release
 
-The following table lists the models that will be available for at least 12 months after initial release:
+The following table lists the models that will be available for at least 12
+months after initial release:
 
 ### Gemini models
 
-<br />
 
 | Model ID | Release date | Retirement date | Replacement model |
 |---|---|---|---|
@@ -28,7 +30,6 @@ The following table lists the models that will be available for at least 12 mont
 
 ### Gemini image models
 
-<br />
 
 | Model ID | Release date | Retirement date | Replacement model |
 |---|---|---|---|
@@ -40,7 +41,6 @@ The following table lists the models that will be available for at least 12 mont
 
 ### Veo models
 
-<br />
 
 | Model ID | Release date | Retirement date | Replacement model |
 |---|---|---|---|
@@ -54,7 +54,6 @@ The following table lists the models that will be available for at least 12 mont
 
 ### Embeddings models
 
-<br />
 
 | Model ID | Release date | Retirement date | Replacement model |
 |---|---|---|---|
@@ -69,9 +68,9 @@ The following table lists the models that will be available for at least 12 mont
 
 ### Models available for shorter availability periods
 
-Short-term availability models retire 45 days after a replacement model is released. The following table lists models available for shorter terms:
+Short-term availability models retire 45 days after a replacement model is
+released. The following table lists models available for shorter terms:
 
-<br />
 
 | Model ID | Release date | Retirement date | Replacement model |
 |---|---|---|---|
@@ -106,9 +105,14 @@ Short-term availability models retire 45 days after a replacement model is relea
 
 ## Migrate to a latest available model
 
-To learn how to migrate to a latest stable model, see [Migrate to the latest Gemini models](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/migrate). This guide gives you a set of migration steps that aims to minimize some potential risks involved in model migration and helps you use new models in an optimal way.
+To learn how to migrate to a latest stable model, see
+[Migrate to the latest Gemini models](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/migrate).
+This guide gives you a set of migration steps that aims to minimize some
+potential risks involved in model migration and helps you use new models in an
+optimal way.
 
-However, if you don't have time to follow the guide and just need to quickly resolve the errors caused by models reaching their retirement dates, do the following:
+However, if you don't have time to follow the guide and just need to quickly
+resolve the errors caused by models reaching their retirement dates, do the following:
 
 1. Update your application to point to the recommended upgrades.
 2. Test all mission critical features to make sure everything works as expected.
@@ -119,5 +123,6 @@ However, if you don't have time to follow the guide and just need to quickly res
 Resource
 
 ### [Deployment and endpoint locations](https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/locations)
+
 
 Learn about deployment and endpoint locations for models in Agent Platform.
