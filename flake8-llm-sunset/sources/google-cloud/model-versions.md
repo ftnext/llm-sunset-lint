@@ -18,13 +18,13 @@ months after initial release:
 
 | Model ID | Release date | Retirement date | Replacement model |
 |---|---|---|---|
-| `gemini-3.5-flash` | May 19, 2026 | May 19, 2027 or later |   |
 | `gemini-3.5-flash-lite` | July 21, 2026 | July 21, 2027 or later |   |
+| `gemini-3.5-flash` | May 19, 2026 | May 19, 2027 or later |   |
 | `gemini-3.1-flash-lite` | May 7, 2026 | May 7, 2027 or later |   |
-| `gemini-live-2.5-flash-native-audio` | December 12, 2025 | December 13, 2026 |   |
 | `gemini-2.5-pro` | June 17, 2025 | October 20, 2026 | Gemini 3.5 Flash |
 | `gemini-2.5-flash` | June 17, 2025 | October 20, 2026 | Gemini 3.5 Flash-Lite or Gemini 3.1 Flash-Lite |
 | `gemini-2.5-flash-lite` | July 22, 2025 | October 20, 2026 | Gemini 3.1 Flash-Lite or Gemma 4 |
+| `gemini-live-2.5-flash-native-audio` | December 12, 2025 | December 13, 2026 |   |
 
 <br />
 
@@ -33,8 +33,8 @@ months after initial release:
 
 | Model ID | Release date | Retirement date | Replacement model |
 |---|---|---|---|
-| `gemini-3.1-flash-image` | May 28, 2026 | May 28, 2027 or later |   |
 | `gemini-3-pro-image` | May 28, 2026 | May 28, 2027 or later |   |
+| `gemini-3.1-flash-image` | May 28, 2026 | May 28, 2027 or later |   |
 | `gemini-2.5-flash-image` | October 2, 2025 | October 2, 2026 | Gemini 3.1 Flash-Lite Image |
 
 <br />
@@ -44,11 +44,11 @@ months after initial release:
 
 | Model ID | Release date | Retirement date | Replacement model |
 |---|---|---|---|
-| `veo-3.1-generate-001` | November 17, 2025 | November 17, 2026 or later |   |
-| `veo-3.1-fast-generate-001` | November 17, 2025 | November 17, 2026 or later |   |
+| `veo-2.0-generate-001` | May 27, 2025 | June 30, 2026 | veo-3.1-generate-001 |
 | `veo-3.0-generate-001` | July 29, 2025 | June 30, 2026 | veo-3.1-generate-001 |
 | `veo-3.0-fast-generate-001` | July 29, 2025 | June 30, 2026 | veo-3.1-fast-generate-001 |
-| `veo-2.0-generate-001` | May 27, 2025 | June 30, 2026 | veo-3.1-generate-001 |
+| `veo-3.1-generate-001` | November 17, 2025 | November 17, 2026 or later |   |
+| `veo-3.1-fast-generate-001` | November 17, 2025 | November 17, 2026 or later |   |
 
 <br />
 
