@@ -44,7 +44,6 @@ months after initial release:
 
 | Model ID | Release date | Retirement date | Replacement model |
 |---|---|---|---|
-| `veo-2.0-generate-001` | May 27, 2025 | June 30, 2026 | veo-3.1-generate-001 |
 | `veo-3.0-generate-001` | July 29, 2025 | June 30, 2026 | veo-3.1-generate-001 |
 | `veo-3.0-fast-generate-001` | July 29, 2025 | June 30, 2026 | veo-3.1-fast-generate-001 |
 | `veo-3.1-generate-001` | November 17, 2025 | November 17, 2026 or later |   |
