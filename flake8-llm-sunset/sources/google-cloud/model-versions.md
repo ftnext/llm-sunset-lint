@@ -74,6 +74,7 @@ released. The following table lists models available for shorter terms:
 
 | Model ID | Release date | Retirement date | Replacement model |
 |---|---|---|---|
+| `gemini-3.8-flash` | September 2, 2026 | No retirement date announced |   |
 | `gemini-3.7-flash` | August 13, 2026 | No retirement date announced |   |
 | `gemini-3.6-flash` | July 21, 2026 | No retirement date announced |   |
 
