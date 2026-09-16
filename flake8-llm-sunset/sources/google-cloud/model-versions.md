@@ -33,10 +33,10 @@ months after initial release:
 
 | Model ID | Release date | Retirement date | Replacement model |
 |---|---|---|---|
-| `gemini-3.1-flash-lite-image` | June 23, 2026 | No retirement date announced |   |
+| `gemini-3.1-flash-lite-image` | June 23, 2026 | June 28, 2027 or later |   |
 | `gemini-3-pro-image` | May 28, 2026 | May 28, 2027 or later |   |
 | `gemini-3.1-flash-image` | May 28, 2026 | May 28, 2027 or later |   |
-| `gemini-2.5-flash-image` | October 2, 2025 | October 2, 2026 | Gemini 3.1 Flash-Lite Image |
+| `gemini-2.5-flash-image` | October 2, 2025 | March 15, 2027 | Gemini 3.1 Flash-Lite Image |
 
 <br />
 
