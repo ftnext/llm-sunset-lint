@@ -91,6 +91,24 @@ def test_warns_for_discontinued_preview_image_endpoint(model):
     )
 
 
+def test_warns_for_image_model_with_earliest_possible_retirement_date():
+    errors = check('MODEL = "gemini-3.1-flash-lite-image"', date(2027, 6, 27))
+
+    assert errors[0][2] == (
+        "LSG002 Gemini model 'gemini-3.1-flash-lite-image' may shut down on or "
+        "after 2027-06-28"
+    )
+
+
+def test_warns_for_image_model_with_fixed_retirement_date():
+    errors = check('MODEL = "gemini-2.5-flash-image"', date(2027, 2, 15))
+
+    assert errors[0][2] == (
+        "LSG002 Gemini model 'gemini-2.5-flash-image' shuts down on 2027-03-15 "
+        "(28 days remaining)"
+    )
+
+
 def test_distinguishes_earliest_possible_shutdown_date():
     errors = check('MODEL = "gemini-3.5-flash"', date(2027, 4, 19))
 
@@ -143,8 +161,5 @@ def test_warns_for_retired_model_from_expanded_markdown_section():
 
 
 def test_ignores_unknown_or_no_shutdown_date_model():
-    source = (
-        'MODELS = ["gemini-3.6-flash", "gemini-3.1-flash-lite-image", '
-        '"gemini-something-new"]'
-    )
+    source = 'MODELS = ["gemini-3.6-flash", "gemini-something-new"]'
     assert check(source, date(2030, 1, 1)) == []
