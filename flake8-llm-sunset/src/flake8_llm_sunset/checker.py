@@ -106,7 +106,7 @@ class ModelExpiryChecker:
     """Find expiring Google model IDs in Python string literals."""
 
     name = "flake8-llm-sunset"
-    version = "0.0.4"
+    version = "0.0.5"
     today = staticmethod(date.today)
 
     def __init__(self, tree: ast.AST) -> None:

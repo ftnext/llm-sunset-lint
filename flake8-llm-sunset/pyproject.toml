@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flake8-llm-sunset"
-version = "0.0.4"
+version = "0.0.5"
 description = "A flake8 plugin that warns about expiring LLM model IDs"
 readme = "README.md"
 requires-python = ">=3.10"
