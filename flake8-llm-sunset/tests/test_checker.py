@@ -160,6 +160,37 @@ def test_warns_for_retired_model_from_expanded_markdown_section():
     )
 
 
+def test_warns_for_newly_announced_gemini_3_7_and_3_6_dates():
+    errors = check('MODEL = "gemini-3.7-flash"', date(2026, 12, 30))
+    assert errors == [
+        (
+            1,
+            8,
+            "LSG002 Gemini model 'gemini-3.7-flash' shuts down on 2027-01-28 "
+            "(29 days remaining)",
+            ModelExpiryChecker,
+        )
+    ]
+
+    errors = check('MODEL = "gemini-3.6-flash"', date(2026, 10, 20))
+    assert errors == [
+        (
+            1,
+            8,
+            "LSG002 Gemini model 'gemini-3.6-flash' shuts down on 2026-11-19 "
+            "(30 days remaining)",
+            ModelExpiryChecker,
+        )
+    ]
+
+
 def test_ignores_unknown_or_no_shutdown_date_model():
     source = 'MODELS = ["gemini-3.6-flash", "gemini-something-new"]'
-    assert check(source, date(2030, 1, 1)) == []
+    assert check(source, date(2030, 1, 1)) == [
+        (
+            1,
+            10,
+            "LSG001 Gemini model 'gemini-3.6-flash' was shut down on 2026-11-19",
+            ModelExpiryChecker,
+        )
+    ]

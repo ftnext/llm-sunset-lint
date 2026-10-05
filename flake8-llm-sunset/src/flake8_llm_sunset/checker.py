@@ -25,6 +25,8 @@ MODEL_SHUTDOWNS = {
     "gemini-3.5-flash-lite": date(2027, 7, 21),
     "gemini-3.1-flash-lite": date(2027, 5, 7),
     "gemini-live-2.5-flash-native-audio": date(2026, 12, 13),
+    "gemini-3.7-flash": date(2027, 1, 28),
+    "gemini-3.6-flash": date(2026, 11, 19),
     "gemini-2.5-pro": date(2026, 10, 20),
     "gemini-2.5-flash": date(2026, 10, 20),
     "gemini-2.5-flash-lite": date(2026, 10, 20),
