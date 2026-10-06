@@ -38,6 +38,10 @@ jobs:
           ISSUE_NUMBER: ${{ inputs.issue_number }}
         shell: bash
         run: |
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "Review must use the trusted main workflow." >&2
+            exit 1
+          fi
           if [[ ! "$ISSUE_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
             echo "Invalid issue number." >&2
             exit 1
@@ -222,11 +226,42 @@ jobs:
               ;;
           esac
 
+      - name: Record classifier provenance
+        env:
+          DECISION: ${{ steps.classification.outputs.decision }}
+          ISSUE_NUMBER: ${{ steps.inputs.outputs.issue_number }}
+          SOURCE_SHA: ${{ steps.inputs.outputs.commit_sha }}
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/classifier-result"
+          jq -n \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg review_run_id "$GITHUB_RUN_ID" \
+            --arg run_attempt "$GITHUB_RUN_ATTEMPT" \
+            --arg review_head_sha "$GITHUB_SHA" \
+            --arg issue_number "$ISSUE_NUMBER" \
+            --arg source_sha "$SOURCE_SHA" \
+            --arg decision "$DECISION" \
+            '{schema_version: 1, repository: $repository,
+              review_run_id: $review_run_id, run_attempt: $run_attempt,
+              review_head_sha: $review_head_sha, issue_number: $issue_number,
+              source_sha: $source_sha, decision: $decision}' \
+            > "$RUNNER_TEMP/classifier-result/classifier-result.json"
+
+      - name: Upload classifier result
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: classifier-result-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/classifier-result/classifier-result.json
+          if-no-files-found: error
+          retention-days: 7
+
   mutate:
     needs: classify
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
+      actions: write
       issues: write
     steps:
       - name: Recheck issue before mutation
@@ -252,20 +287,21 @@ jobs:
             exit 1
           fi
 
-      - name: Assign required update
+      - name: Request implementation of required update
         if: needs.classify.outputs.decision == 'NEEDS_UPDATE'
         env:
           GH_TOKEN: ${{ github.token }}
+          COMMIT_SHA: ${{ needs.classify.outputs.commit_sha }}
           ISSUE_NUMBER: ${{ needs.classify.outputs.issue_number }}
         shell: bash
         run: |
-          gh issue edit "$ISSUE_NUMBER" \
-            --repo "${{ github.repository }}" \
-            --add-assignee ftnext
-          gh issue comment "$ISSUE_NUMBER" \
-            --repo "${{ github.repository }}" \
-            --body \
-            'Automated Copilot review found retirement-date changes that require `MODEL_SHUTDOWNS` and/or `EARLIEST_SHUTDOWNS` to be updated. Assigning @ftnext for implementation.'
+          # Explicit dispatch works with GITHUB_TOKEN, unlike a bot issue event.
+          gh workflow run implement-upstream-markdown-changes.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            --field issue_number="$ISSUE_NUMBER" \
+            --field commit_sha="$COMMIT_SHA" \
+            --field review_run_id="$GITHUB_RUN_ID"
 
       - name: Close unnecessary update
         if: needs.classify.outputs.decision == 'NO_UPDATE'
