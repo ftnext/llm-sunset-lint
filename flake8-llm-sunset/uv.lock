@@ -43,7 +43,7 @@ wheels = [
 
 [[package]]
 name = "flake8-llm-sunset"
-version = "0.0.5"
+version = "0.0.6"
 source = { editable = "." }
 dependencies = [
     { name = "flake8" },
