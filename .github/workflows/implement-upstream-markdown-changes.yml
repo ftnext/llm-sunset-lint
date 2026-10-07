@@ -1,0 +1,165 @@
+name: Implement upstream Markdown changes
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Unhandled source update issue
+        required: true
+        type: string
+      commit_sha:
+        description: Reviewed source update commit
+        required: true
+        type: string
+      review_run_id:
+        description: Successful review run with a NEEDS_UPDATE classifier artifact
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: implement-upstream-markdown-${{ inputs.issue_number }}-${{ inputs.commit_sha }}
+  cancel-in-progress: false
+
+env:
+  # Exact model selection; a missing entitlement/model fails instead of falling back.
+  UPDATER_MODEL: mai-code-1.1-flash
+
+jobs:
+  validate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: read
+      issues: read
+      pull-requests: read
+    outputs:
+      base_sha: ${{ steps.validate.outputs.base_sha }}
+      skip: ${{ steps.validate.outputs.skip }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate provenance, freshness and existing PRs
+        id: validate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          SOURCE_SHA: ${{ inputs.commit_sha }}
+          REVIEW_RUN_ID: ${{ inputs.review_run_id }}
+        run: python .github/scripts/upstream_update.py validate --output "${{ runner.temp }}/provenance/provenance.json"
+      - name: Upload validated provenance
+        if: steps.validate.outputs.skip != 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: implementation-provenance
+          path: ${{ runner.temp }}/provenance/provenance.json
+          if-no-files-found: error
+          retention-days: 7
+
+  generate:
+    needs: validate
+    if: needs.validate.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      copilot-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.validate.outputs.base_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: implementation-provenance
+          path: ${{ runner.temp }}/provenance
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+      - name: Install pinned Copilot CLI
+        run: npm install --global @github/copilot@1.0.80
+      - name: Prepare bounded prompt from pinned inputs
+        run: |
+          python .github/scripts/upstream_update.py prepare \
+            --provenance "$RUNNER_TEMP/provenance/provenance.json" \
+            --output "$RUNNER_TEMP/implementation-prompt.txt"
+      - name: Generate candidate without tools
+        env:
+          COPILOT_CACHE_HOME: ${{ runner.temp }}/copilot-cache
+          COPILOT_HOME: ${{ runner.temp }}/copilot-home
+          COPILOT_MCP_TOOL_CACHE: "false"
+          GITHUB_COPILOT_PROMPT_MODE_EXTENSIONS: "false"
+          GITHUB_COPILOT_PROMPT_MODE_REPO_HOOKS: "false"
+          GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP: "false"
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/copilot-work"
+          # No shell/edit/network tools, repository hooks or external MCPs.
+          # Only this step receives the Copilot token; no generated code is run.
+          timeout 10m copilot \
+            --model "$UPDATER_MODEL" \
+            --silent --stream=off --no-auto-update \
+            --no-custom-instructions --no-experimental \
+            --no-remote --no-remote-export --disable-builtin-mcps \
+            --available-tools=ask_user --no-ask-user \
+            -C "$RUNNER_TEMP/copilot-work" \
+            -p "$(< "$RUNNER_TEMP/implementation-prompt.txt")" \
+            > "$RUNNER_TEMP/response.json"
+      - name: Validate and package candidate as data
+        run: |
+          python .github/scripts/upstream_update.py build \
+            --provenance "$RUNNER_TEMP/provenance/provenance.json" \
+            --response "$RUNNER_TEMP/response.json" \
+            --artifact "$RUNNER_TEMP/candidate"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: upstream-candidate
+          path: ${{ runner.temp }}/candidate/candidate.json
+          if-no-files-found: error
+          retention-days: 7
+
+  test:
+    needs: [validate, generate]
+    permissions:
+      contents: read
+    uses: ./.github/workflows/testing.yml
+    with:
+      base_sha: ${{ needs.validate.outputs.base_sha }}
+      candidate_artifact: upstream-candidate
+      candidate_model: mai-code-1.1-flash
+
+  publish:
+    needs: [validate, generate, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: write
+      issues: read
+      pull-requests: write
+    steps:
+      # This is trusted base code, never the generated tree or branch.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.validate.outputs.base_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: upstream-candidate
+          path: ${{ runner.temp }}/candidate
+      - name: Revalidate and publish a Draft PR after the complete matrix
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          SOURCE_SHA: ${{ inputs.commit_sha }}
+          REVIEW_RUN_ID: ${{ inputs.review_run_id }}
+        run: python .github/scripts/upstream_update.py publish --artifact "${{ runner.temp }}/candidate"
