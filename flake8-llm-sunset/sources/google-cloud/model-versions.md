@@ -18,6 +18,8 @@ months after initial release:
 
 | Model ID | Release date | Retirement date | Replacement model ID |
 |---|---|---|---|
+| [`gemini-4-argon`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/4-argon) | October 13, 2026 | October 13, 2027 or later |   |
+| [`gemini-3.8-live`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-live) | September 24, 2026 | September 25, 2027 or later |   |
 | [`gemini-3.5-flash-lite`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite) | July 21, 2026 | July 21, 2027 or later |   |
 | [`gemini-3.5-flash`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash) | May 19, 2026 | May 19, 2027 or later |   |
 | [`gemini-3.1-flash-lite`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-1-flash-lite) | May 7, 2026 | May 7, 2027 or later |   |
@@ -79,8 +81,9 @@ The following table lists models available for shorter terms:
 
 | Model ID | Release date | Retirement date | Replacement model ID |
 |---|---|---|---|
+| [`gemini-4-argon-cyber-permissive`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/4-argon#cyber) | October 13, 2026 | No retirement date announced |   |
 | [`gemini-3.8-flash-cyber`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash-cyber) | September 16, 2026 | No retirement date announced |   |
-| [`gemini-3.8-flash`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash) | September 2, 2026 | No retirement date announced |   |
+| [`gemini-3.8-flash`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash) | September 2, 2026 | September 2, 2027 or later |   |
 | [`gemini-3.7-flash`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-7-flash) | August 13, 2026 | January 28, 2027 | [`gemini-3.8-flash`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash) |
 | [`gemini-3.6-flash`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-6-flash) | July 21, 2026 | November 19, 2026 | [`gemini-3.8-flash`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash) |
 | [`gemini-nano-banana-2.1`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/nano-banana-2-1) | October 6, 2026 | No retirement date announced |   |

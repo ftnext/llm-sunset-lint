@@ -1,6 +1,16 @@
 ## Featured Gemini models
 
 
+4 Argon
+
+
+Google's frontier model that excels at deep work in complex, real-world tasks
+
+- Excels across coding, finance, legal, cybersecurity, and science
+- Deep multi-step reasoning with configurable thinking levels
+- Long-output generation up to 1 million tokens
+
+[](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/4-argon)
 3.8 Flash
 
 
@@ -11,16 +21,6 @@ Built for long-horizon coding and autonomous agents
 - Stronger multimodal reasoning
 
 [](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash)
-3.5 Flash-Lite
-
-
-Our fast, budget-friendly way to power your everyday applications
-
-- Optimized for low latency and high-volume traffic
-- Capable tool orchestration
-- Precise document understanding
-
-[](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite)
 Nano Banana 2.1
 
 
@@ -34,7 +34,7 @@ Turn ideas into production-ready assets
 
 ## Generally available Gemini models
 
-[Gemini 3.8 Flash Cyber (Gemini Cyber)](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash-cyber) Our model optimized for cyber security. [Gemini 3.8 Live](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-live) Optimized for live interactions, with improved voice quality, reliability, and real-time agent orchestration. [Gemini 3.8 Flash](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash) Our most intelligent workhorse model yet, built for long-horizon coding and autonomous agents. [Gemini 3.7 Flash](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-7-flash) Our intelligent everyday driver for developers, delivering a step forward in software engineering and feeling distinctly better to build with. [Gemini 3.6 Flash](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-6-flash) Optimized for complex, multi-step workflows, improved code generation, and improved multimodal reasoning---all while using fewer tokens. [Gemini 3.5 Flash-Lite](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite) Create lightweight agentic workflows at top speeds and minimal cost. [Gemini Nano Banana 2.1](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/nano-banana-2-1) High-fidelity, multimodal image generation and editing. Delivers significantly improved prompt adherence, text rendering, and visual quality. [Gemini 3.1 Flash-Lite Image (Nano Banana 2 Lite)](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-1-flash-lite-image) Turn ideas into production-ready assets. Designed for high-volume and latency-sensitive workloads. [Gemini 3.1 Flash Image](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-1-flash-image) Turn ideas into production-ready assets. Features conversational editing, multi-image fusion, and character consistency for advanced creative workflows. [Gemini 3 Pro Image](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-pro-image) High-fidelity image generation with reasoning-enhanced composition. Supports legible text rendering, complex multi-turn editing, and character consistency using up to 14 reference inputs. [Gemini 3.5 Flash](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash) Gemini 3.5 Flash delivers near-Pro intelligence at Flash-tier cost and speed: Pro-level coding proficiency, parallel agentic execution, all at the same price point as a Flash model. [Gemini 3.1 Flash-Lite](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-1-flash-lite) Our most cost-efficient model, optimized for low latency use cases for high-volume, cost-sensitive LLM traffic. [Gemini 2.5 Pro](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/2-5-pro) Our high-capability model for complex reasoning and coding. Features adaptive thinking capabilities to solve complex agentic and multimodal challenges with a 1 million token context. [Gemini 2.5 Flash](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/2-5-flash) Lightning-fast and highly capable. Delivers a balance of intelligence and latency with controllable thinking budgets for versatile applications. [Gemini 2.5 Flash Image](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/2-5-flash-image) Turn ideas into production-ready assets. Features conversational editing, multi-image fusion, and character consistency for advanced creative workflows. [Gemini 2.5 Flash-Lite](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/2-5-flash-lite) Built for massive scale. Balances cost and performance for high-throughput tasks, optimized for efficiency without sacrificing multimodal understanding. [Gemini 2.5 Flash with Gemini Live API](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/2-5-flash-live-api) Designed for real-time, bidirectional streaming. Features low-latency built-in audio and affective dialogue capabilities for natural, conversational interactions.
+[Gemini 4 Argon](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/4-argon) Google's frontier model that excels at deep work in complex, real-world tasks across domains including coding, finance, legal, cybersecurity, and science. [Gemini 4 Argon Cyber Permissive (Gemini Frontier Cyber Model)](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/4-argon#cyber) A version of Gemini 4 Argon for defensive cybersecurity use cases. Available behind an allowlist. [Gemini 3.8 Flash Cyber (Gemini Cyber)](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash-cyber) Our model optimized for cyber security. [Gemini 3.8 Live](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-live) Optimized for live interactions, with improved voice quality, reliability, and real-time agent orchestration. [Gemini 3.8 Flash](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash) Our most intelligent workhorse model yet, built for long-horizon coding and autonomous agents. [Gemini 3.7 Flash](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-7-flash) Our intelligent everyday driver for developers, delivering a step forward in software engineering and feeling distinctly better to build with. [Gemini 3.6 Flash](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-6-flash) Optimized for complex, multi-step workflows, improved code generation, and improved multimodal reasoning---all while using fewer tokens. [Gemini 3.5 Flash-Lite](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite) Create lightweight agentic workflows at top speeds and minimal cost. [Gemini Nano Banana 2.1](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/nano-banana-2-1) High-fidelity, multimodal image generation and editing. Delivers significantly improved prompt adherence, text rendering, and visual quality. [Gemini 3.1 Flash-Lite Image (Nano Banana 2 Lite)](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-1-flash-lite-image) Turn ideas into production-ready assets. Designed for high-volume and latency-sensitive workloads. [Gemini 3.1 Flash Image](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-1-flash-image) Turn ideas into production-ready assets. Features conversational editing, multi-image fusion, and character consistency for advanced creative workflows. [Gemini 3 Pro Image](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-pro-image) High-fidelity image generation with reasoning-enhanced composition. Supports legible text rendering, complex multi-turn editing, and character consistency using up to 14 reference inputs. [Gemini 3.5 Flash](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash) Gemini 3.5 Flash delivers near-Pro intelligence at Flash-tier cost and speed: Pro-level coding proficiency, parallel agentic execution, all at the same price point as a Flash model. [Gemini 3.1 Flash-Lite](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-1-flash-lite) Our most cost-efficient model, optimized for low latency use cases for high-volume, cost-sensitive LLM traffic. [Gemini 2.5 Pro](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/2-5-pro) Our high-capability model for complex reasoning and coding. Features adaptive thinking capabilities to solve complex agentic and multimodal challenges with a 1 million token context. [Gemini 2.5 Flash](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/2-5-flash) Lightning-fast and highly capable. Delivers a balance of intelligence and latency with controllable thinking budgets for versatile applications. [Gemini 2.5 Flash Image](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/2-5-flash-image) Turn ideas into production-ready assets. Features conversational editing, multi-image fusion, and character consistency for advanced creative workflows. [Gemini 2.5 Flash-Lite](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/2-5-flash-lite) Built for massive scale. Balances cost and performance for high-throughput tasks, optimized for efficiency without sacrificing multimodal understanding. [Gemini 2.5 Flash with Gemini Live API](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/2-5-flash-live-api) Designed for real-time, bidirectional streaming. Features low-latency built-in audio and affective dialogue capabilities for natural, conversational interactions.
 
 ## Preview Gemini models
 
@@ -65,8 +65,9 @@ Turn ideas into production-ready assets
 ### Gemini
 
 
-All the Gemini models can understand and respond in the
-following languages:
+All Gemini models can understand the following languages.
+Gemini models that are capable of text responses can
+also respond in these languages:
 
 
 Afrikaans (`af`),
