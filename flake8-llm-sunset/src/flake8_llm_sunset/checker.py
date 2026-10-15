@@ -4,79 +4,27 @@ from __future__ import annotations
 
 import ast
 import calendar
+import json
 import re
 from datetime import date
+from importlib.resources import files
 from typing import Iterator
 
 
 ERROR_CODE_PREFIX = "LSG"
 
-# Source:
-# https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions.md.txt
-# Discontinued preview image endpoints:
-# https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/google-models.md.txt
-# Repository snapshots of both documents are kept under sources/google-cloud/.
-# Models whose retirement date has not been announced are omitted. The Markdown
-# source is used because it includes the contents of collapsed tabs and sections.
+# Lifecycle data is bundled with the package; no network access is needed.
+_MODEL_DATA = json.loads(
+    files(__package__)
+    .joinpath("model_shutdowns.json")
+    .read_text(encoding="utf-8")
+)
 MODEL_SHUTDOWNS = {
-    "gemini-flash-latest": date(2026, 8, 31),
-    "gemini-flash-lite-latest": date(2026, 8, 31),
-    "gemini-3.5-flash": date(2027, 5, 19),
-    "gemini-3.5-flash-lite": date(2027, 7, 21),
-    "gemini-3.1-flash-lite": date(2027, 5, 7),
-    "gemini-live-2.5-flash-native-audio": date(2026, 12, 13),
-    "gemini-3.7-flash": date(2027, 1, 28),
-    "gemini-3.6-flash": date(2026, 11, 19),
-    "gemini-2.5-pro": date(2026, 10, 20),
-    "gemini-2.5-flash": date(2026, 10, 20),
-    "gemini-2.5-flash-lite": date(2026, 10, 20),
-    "gemini-3.1-flash-image": date(2027, 5, 28),
-    "gemini-3-pro-image": date(2027, 5, 28),
-    "gemini-3.1-flash-lite-image": date(2027, 6, 28),
-    "gemini-3.1-flash-image-preview": date(2026, 7, 17),
-    "gemini-3-pro-image-preview": date(2026, 7, 17),
-    "gemini-2.5-flash-image": date(2027, 3, 15),
-    "veo-3.1-generate-001": date(2026, 11, 17),
-    "veo-3.1-fast-generate-001": date(2026, 11, 17),
-    "veo-3.0-generate-001": date(2026, 6, 30),
-    "veo-3.0-fast-generate-001": date(2026, 6, 30),
-    "veo-2.0-generate-001": date(2026, 6, 30),
-    "gemini-embedding-001": date(2028, 5, 20),
-    "text-embedding-005": date(2027, 4, 1),
-    "text-embedding-004": date(2027, 4, 1),
-    "text-multilingual-embedding-002": date(2027, 4, 1),
-    "multimodalembedding@001": date(2027, 4, 1),
-    "gemini-2.0-flash": date(2026, 6, 1),
-    "gemini-2.0-flash-lite": date(2026, 6, 1),
-    "gemini-1.5-pro-001": date(2025, 5, 24),
-    "gemini-1.5-pro-002": date(2025, 9, 24),
-    "gemini-1.5-flash-001": date(2025, 5, 24),
-    "gemini-1.5-flash-002": date(2025, 9, 24),
-    "gemini-1.0-pro-001": date(2025, 4, 21),
-    "gemini-1.0-pro-002": date(2025, 4, 21),
-    "gemini-1.0-pro-vision-001": date(2025, 4, 21),
-    "textembedding-gecko@003": date(2025, 5, 24),
-    "textembedding-gecko-multilingual@001": date(2025, 5, 24),
-    "text-bison": date(2025, 4, 21),
-    "chat-bison": date(2025, 4, 21),
-    "code-gecko": date(2025, 4, 21),
-    "textembedding-gecko@002": date(2025, 4, 21),
-    "textembedding-gecko@001": date(2025, 4, 21),
-    "imagetext": date(2025, 9, 24),
+    model: date.fromisoformat(details["shutdown_date"])
+    for model, details in _MODEL_DATA.items()
 }
-
-# Google Cloud publishes these as the earliest possible retirement dates ("on
-# or after"), rather than as fixed shutdown dates.
 EARLIEST_SHUTDOWNS = {
-    "gemini-3.5-flash",
-    "gemini-3.5-flash-lite",
-    "gemini-3.1-flash-lite",
-    "gemini-3.1-flash-lite-image",
-    "gemini-3.1-flash-image",
-    "gemini-3-pro-image",
-    "veo-3.1-generate-001",
-    "veo-3.1-fast-generate-001",
-    "gemini-embedding-001",
+    model for model, details in _MODEL_DATA.items() if details["earliest"]
 }
 
 _MODEL_IDS = sorted(MODEL_SHUTDOWNS, key=len, reverse=True)
