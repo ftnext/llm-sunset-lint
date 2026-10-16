@@ -1,21 +1,59 @@
 name: Run tests
 
-on: [push]
+on:
+  push:
+  workflow_call:
+    inputs:
+      base_sha:
+        description: Trusted base commit for an implementation candidate
+        required: false
+        default: ""
+        type: string
+      candidate_artifact:
+        description: Optional same-run candidate artifact to validate and test
+        required: false
+        default: ""
+        type: string
+      candidate_model:
+        description: Exact model expected in the candidate manifest
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
   tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.base_sha || github.sha }}
+          persist-credentials: false
+      - name: Download implementation candidate
+        if: inputs.candidate_artifact != ''
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: ${{ inputs.candidate_artifact }}
+          path: ${{ runner.temp }}/candidate
+      - name: Validate candidate scope and overlay approved files
+        if: inputs.candidate_artifact != ''
+        env:
+          UPDATER_MODEL: ${{ inputs.candidate_model }}
+        run: python .github/scripts/upstream_update.py apply --artifact "${{ runner.temp }}/candidate"
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Test workflow guardrails
+        run: python -m unittest discover -s .github/scripts -p 'test_*.py' -v
       - name: Install dependencies
         working-directory: flake8-llm-sunset
         run: |
