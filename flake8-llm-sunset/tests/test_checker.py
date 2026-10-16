@@ -1,9 +1,19 @@
 import ast
-from datetime import date
+import json
+from datetime import date, timedelta
+from importlib.resources import files
 
 import pytest
 
 from flake8_llm_sunset import ModelExpiryChecker
+from flake8_llm_sunset.checker import one_month_before
+
+
+MODEL_DATA = json.loads(
+    files("flake8_llm_sunset")
+    .joinpath("model_shutdowns.json")
+    .read_text(encoding="utf-8")
+)
 
 
 def check(source: str, today: date):
@@ -12,185 +22,102 @@ def check(source: str, today: date):
     return list(checker.run())
 
 
-def test_warns_one_calendar_month_before_shutdown():
-    errors = check('MODEL = "gemini-2.5-flash"', date(2026, 9, 20))
+def test_model_data_is_not_empty():
+    assert MODEL_DATA
 
-    assert len(errors) == 1
-    assert errors[0][2] == (
-        "LSG002 Gemini model 'gemini-2.5-flash' shuts down on 2026-10-20 "
-        "(30 days remaining)"
-    )
+
+@pytest.mark.parametrize("model, details", MODEL_DATA.items(), ids=MODEL_DATA)
+def test_model_data_schema(model, details):
+    assert isinstance(model, str) and model and model.strip() == model
+    assert set(details) == {"shutdown_date", "earliest"}
+    assert type(details["earliest"]) is bool
+    shutdown_date = details["shutdown_date"]
+    assert date.fromisoformat(shutdown_date).isoformat() == shutdown_date
+
+
+@pytest.mark.parametrize("model, details", MODEL_DATA.items(), ids=MODEL_DATA)
+@pytest.mark.parametrize(
+    "stage",
+    ["before_window", "window_start", "day_before", "shutdown", "day_after"],
+)
+def test_model_lifecycle(model, details, stage):
+    shutdown = date.fromisoformat(details["shutdown_date"])
+    window_start = one_month_before(shutdown)
+    today = {
+        "before_window": window_start - timedelta(days=1),
+        "window_start": window_start,
+        "day_before": shutdown - timedelta(days=1),
+        "shutdown": shutdown,
+        "day_after": shutdown + timedelta(days=1),
+    }[stage]
+
+    errors = check(f'MODEL = "{model}"', today)
+
+    if stage == "before_window":
+        assert errors == []
+        return
+
+    if details["earliest"]:
+        status = f"may shut down on or after {shutdown.isoformat()}"
+    elif stage in {"shutdown", "day_after"}:
+        status = f"was shut down on {shutdown.isoformat()}"
+    else:
+        status = (
+            f"shuts down on {shutdown.isoformat()} "
+            f"({(shutdown - today).days} days remaining)"
+        )
+    if model.startswith("gemini"):
+        family = "Gemini"
+    elif model.startswith("veo"):
+        family = "Veo"
+    else:
+        family = "Google"
+    code = "LSG001" if stage in {"shutdown", "day_after"} else "LSG002"
+    assert errors == [
+        (1, 8, f"{code} {family} model '{model}' {status}", ModelExpiryChecker)
+    ]
 
 
 @pytest.mark.parametrize(
-    "model",
+    "value, expected",
     [
-        "gemini-flash-latest",
-        "gemini-flash-lite-latest",
+        (date(2026, 10, 20), date(2026, 9, 20)),
+        (date(2026, 8, 31), date(2026, 7, 31)),
+        (date(2027, 3, 31), date(2027, 2, 28)),
+        (date(2028, 3, 31), date(2028, 2, 29)),
+        (date(2027, 1, 15), date(2026, 12, 15)),
     ],
 )
-def test_warns_for_latest_aliases_shutting_down_on_august_31(model):
-    errors = check(f'MODEL = "{model}"', date(2026, 7, 31))
-
-    assert errors[0][2] == (
-        f"LSG002 Gemini model '{model}' shuts down on 2026-08-31 "
-        "(31 days remaining)"
-    )
-
-
-def test_does_not_warn_before_warning_window():
-    assert check('MODEL = "gemini-2.5-flash"', date(2026, 9, 19)) == []
-
-
-def test_warns_for_already_shutdown_model():
-    errors = check(
-        'client.models.generate_content(model="gemini-2.0-flash", contents="hi")',
-        date(2026, 7, 22),
-    )
-
-    assert errors[0][2] == (
-        "LSG001 Gemini model 'gemini-2.0-flash' was shut down on 2026-06-01"
-    )
-
-
-def test_uses_upcoming_code_until_day_before_shutdown():
-    errors = check('MODEL = "gemini-2.5-flash"', date(2026, 10, 19))
-
-    assert errors[0][2].startswith("LSG002 ")
-
-
-def test_uses_shutdown_code_on_shutdown_date():
-    errors = check('MODEL = "gemini-2.5-flash"', date(2026, 10, 20))
-
-    assert errors[0][2] == (
-        "LSG001 Gemini model 'gemini-2.5-flash' was shut down on 2026-10-20"
-    )
+def test_one_month_before(value, expected):
+    assert one_month_before(value) == expected
 
 
 def test_finds_model_inside_larger_string():
+    model = next(iter(MODEL_DATA))
+    shutdown = date.fromisoformat(MODEL_DATA[model]["shutdown_date"])
     errors = check(
-        'URL = "https://example.test/models/gemini-3.1-flash-image:predict"',
-        date(2027, 5, 1),
+        f'URL = "https://example.test/models/{model}:predict"', shutdown
     )
 
     assert len(errors) == 1
+    assert f"model '{model}'" in errors[0][2]
 
 
-@pytest.mark.parametrize(
-    "model",
-    [
-        "gemini-3.1-flash-image-preview",
-        "gemini-3-pro-image-preview",
-    ],
-)
-def test_warns_for_discontinued_preview_image_endpoint(model):
-    errors = check(f'MODEL = "{model}"', date(2026, 7, 17))
-
-    assert errors[0][2] == (
-        f"LSG001 Gemini model '{model}' was shut down on 2026-07-17"
-    )
+def test_ignores_unknown_model_and_non_string_constants():
+    source = 'VALUES = ["unknown-model", 123, None, True]'
+    assert check(source, date(2030, 1, 1)) == []
 
 
-def test_warns_for_image_model_with_earliest_possible_retirement_date():
-    errors = check('MODEL = "gemini-3.1-flash-lite-image"', date(2027, 6, 27))
-
-    assert errors[0][2] == (
-        "LSG002 Gemini model 'gemini-3.1-flash-lite-image' may shut down on or "
-        "after 2027-06-28"
-    )
+@pytest.mark.parametrize("suffix", ["-unknown", ".unknown", "_unknown"])
+def test_does_not_match_model_prefix(suffix):
+    model = next(iter(MODEL_DATA))
+    assert check(f'MODEL = "{model}{suffix}"', date(2030, 1, 1)) == []
 
 
-def test_warns_for_image_model_with_fixed_retirement_date():
-    errors = check('MODEL = "gemini-2.5-flash-image"', date(2027, 2, 15))
+def test_matches_overlapping_model_ids_without_duplicate_diagnostics():
+    models = list(MODEL_DATA)
+    source = f"MODELS = {models!r}"
+    errors = check(source, date.max)
 
-    assert errors[0][2] == (
-        "LSG002 Gemini model 'gemini-2.5-flash-image' shuts down on 2027-03-15 "
-        "(28 days remaining)"
-    )
-
-
-def test_distinguishes_earliest_possible_shutdown_date():
-    errors = check('MODEL = "gemini-3.5-flash"', date(2027, 4, 19))
-
-    assert errors[0][2] == (
-        "LSG002 Gemini model 'gemini-3.5-flash' may shut down on or after 2027-05-19"
-    )
-
-
-def test_uses_shutdown_code_after_earliest_possible_shutdown_date():
-    errors = check('MODEL = "gemini-3.5-flash"', date(2027, 5, 19))
-
-    assert errors[0][2] == (
-        "LSG001 Gemini model 'gemini-3.5-flash' may shut down on or after 2027-05-19"
-    )
-
-
-def test_warns_for_veo_model_from_expanded_markdown_section():
-    errors = check('MODEL = "veo-3.0-generate-001"', date(2026, 6, 1))
-
-    assert errors[0][2] == (
-        "LSG002 Veo model 'veo-3.0-generate-001' shuts down on 2026-06-30 "
-        "(29 days remaining)"
-    )
-
-
-def test_distinguishes_earliest_possible_veo_shutdown_date():
-    errors = check('MODEL = "veo-3.1-fast-generate-001"', date(2026, 10, 17))
-
-    assert errors[0][2] == (
-        "LSG002 Veo model 'veo-3.1-fast-generate-001' may shut down on or after "
-        "2026-11-17"
-    )
-
-
-def test_warns_for_embedding_model():
-    errors = check('MODEL = "text-embedding-005"', date(2027, 3, 1))
-
-    assert errors[0][2] == (
-        "LSG002 Google model 'text-embedding-005' shuts down on 2027-04-01 "
-        "(31 days remaining)"
-    )
-
-
-def test_warns_for_retired_model_from_expanded_markdown_section():
-    errors = check('MODEL = "textembedding-gecko@003"', date(2025, 6, 1))
-
-    assert errors[0][2] == (
-        "LSG001 Google model 'textembedding-gecko@003' was shut down on 2025-05-24"
-    )
-
-
-def test_warns_for_newly_announced_gemini_3_7_and_3_6_dates():
-    errors = check('MODEL = "gemini-3.7-flash"', date(2026, 12, 30))
-    assert errors == [
-        (
-            1,
-            8,
-            "LSG002 Gemini model 'gemini-3.7-flash' shuts down on 2027-01-28 "
-            "(29 days remaining)",
-            ModelExpiryChecker,
-        )
-    ]
-
-    errors = check('MODEL = "gemini-3.6-flash"', date(2026, 10, 20))
-    assert errors == [
-        (
-            1,
-            8,
-            "LSG002 Gemini model 'gemini-3.6-flash' shuts down on 2026-11-19 "
-            "(30 days remaining)",
-            ModelExpiryChecker,
-        )
-    ]
-
-
-def test_ignores_unknown_or_no_shutdown_date_model():
-    source = 'MODELS = ["gemini-3.6-flash", "gemini-something-new"]'
-    assert check(source, date(2030, 1, 1)) == [
-        (
-            1,
-            10,
-            "LSG001 Gemini model 'gemini-3.6-flash' was shut down on 2026-11-19",
-            ModelExpiryChecker,
-        )
-    ]
+    assert len(errors) == len(models)
+    assert [error[2].split("'")[1] for error in errors] == models
