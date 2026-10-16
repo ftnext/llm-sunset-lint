@@ -23,6 +23,18 @@
     "shutdown_date": "2026-12-13",
     "earliest": false
   },
+  "gemini-4-argon": {
+    "shutdown_date": "2027-10-13",
+    "earliest": true
+  },
+  "gemini-3.8-live": {
+    "shutdown_date": "2027-09-25",
+    "earliest": true
+  },
+  "gemini-3.8-flash": {
+    "shutdown_date": "2027-09-02",
+    "earliest": true
+  },
   "gemini-3.7-flash": {
     "shutdown_date": "2027-01-28",
     "earliest": false
