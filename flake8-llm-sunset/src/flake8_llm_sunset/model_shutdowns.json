@@ -1,0 +1,190 @@
+{
+  "gemini-flash-latest": {
+    "shutdown_date": "2026-08-31",
+    "earliest": false
+  },
+  "gemini-flash-lite-latest": {
+    "shutdown_date": "2026-08-31",
+    "earliest": false
+  },
+  "gemini-3.5-flash": {
+    "shutdown_date": "2027-05-19",
+    "earliest": true
+  },
+  "gemini-3.5-flash-lite": {
+    "shutdown_date": "2027-07-21",
+    "earliest": true
+  },
+  "gemini-3.1-flash-lite": {
+    "shutdown_date": "2027-05-07",
+    "earliest": true
+  },
+  "gemini-live-2.5-flash-native-audio": {
+    "shutdown_date": "2026-12-13",
+    "earliest": false
+  },
+  "gemini-4-argon": {
+    "shutdown_date": "2027-10-13",
+    "earliest": true
+  },
+  "gemini-3.8-live": {
+    "shutdown_date": "2027-09-25",
+    "earliest": true
+  },
+  "gemini-3.8-flash": {
+    "shutdown_date": "2027-09-02",
+    "earliest": true
+  },
+  "gemini-3.7-flash": {
+    "shutdown_date": "2027-01-28",
+    "earliest": false
+  },
+  "gemini-3.6-flash": {
+    "shutdown_date": "2026-11-19",
+    "earliest": false
+  },
+  "gemini-2.5-pro": {
+    "shutdown_date": "2026-10-20",
+    "earliest": false
+  },
+  "gemini-2.5-flash": {
+    "shutdown_date": "2026-10-20",
+    "earliest": false
+  },
+  "gemini-2.5-flash-lite": {
+    "shutdown_date": "2026-10-20",
+    "earliest": false
+  },
+  "gemini-3.1-flash-image": {
+    "shutdown_date": "2027-05-28",
+    "earliest": true
+  },
+  "gemini-3-pro-image": {
+    "shutdown_date": "2027-05-28",
+    "earliest": true
+  },
+  "gemini-3.1-flash-lite-image": {
+    "shutdown_date": "2027-06-28",
+    "earliest": true
+  },
+  "gemini-3.1-flash-image-preview": {
+    "shutdown_date": "2026-07-17",
+    "earliest": false
+  },
+  "gemini-3-pro-image-preview": {
+    "shutdown_date": "2026-07-17",
+    "earliest": false
+  },
+  "gemini-2.5-flash-image": {
+    "shutdown_date": "2027-03-15",
+    "earliest": false
+  },
+  "veo-3.1-generate-001": {
+    "shutdown_date": "2026-11-17",
+    "earliest": true
+  },
+  "veo-3.1-fast-generate-001": {
+    "shutdown_date": "2026-11-17",
+    "earliest": true
+  },
+  "veo-3.0-generate-001": {
+    "shutdown_date": "2026-06-30",
+    "earliest": false
+  },
+  "veo-3.0-fast-generate-001": {
+    "shutdown_date": "2026-06-30",
+    "earliest": false
+  },
+  "veo-2.0-generate-001": {
+    "shutdown_date": "2026-06-30",
+    "earliest": false
+  },
+  "gemini-embedding-001": {
+    "shutdown_date": "2028-05-20",
+    "earliest": true
+  },
+  "text-embedding-005": {
+    "shutdown_date": "2027-04-01",
+    "earliest": false
+  },
+  "text-embedding-004": {
+    "shutdown_date": "2027-04-01",
+    "earliest": false
+  },
+  "text-multilingual-embedding-002": {
+    "shutdown_date": "2027-04-01",
+    "earliest": false
+  },
+  "multimodalembedding@001": {
+    "shutdown_date": "2027-04-01",
+    "earliest": false
+  },
+  "gemini-2.0-flash": {
+    "shutdown_date": "2026-06-01",
+    "earliest": false
+  },
+  "gemini-2.0-flash-lite": {
+    "shutdown_date": "2026-06-01",
+    "earliest": false
+  },
+  "gemini-1.5-pro-001": {
+    "shutdown_date": "2025-05-24",
+    "earliest": false
+  },
+  "gemini-1.5-pro-002": {
+    "shutdown_date": "2025-09-24",
+    "earliest": false
+  },
+  "gemini-1.5-flash-001": {
+    "shutdown_date": "2025-05-24",
+    "earliest": false
+  },
+  "gemini-1.5-flash-002": {
+    "shutdown_date": "2025-09-24",
+    "earliest": false
+  },
+  "gemini-1.0-pro-001": {
+    "shutdown_date": "2025-04-21",
+    "earliest": false
+  },
+  "gemini-1.0-pro-002": {
+    "shutdown_date": "2025-04-21",
+    "earliest": false
+  },
+  "gemini-1.0-pro-vision-001": {
+    "shutdown_date": "2025-04-21",
+    "earliest": false
+  },
+  "textembedding-gecko@003": {
+    "shutdown_date": "2025-05-24",
+    "earliest": false
+  },
+  "textembedding-gecko-multilingual@001": {
+    "shutdown_date": "2025-05-24",
+    "earliest": false
+  },
+  "text-bison": {
+    "shutdown_date": "2025-04-21",
+    "earliest": false
+  },
+  "chat-bison": {
+    "shutdown_date": "2025-04-21",
+    "earliest": false
+  },
+  "code-gecko": {
+    "shutdown_date": "2025-04-21",
+    "earliest": false
+  },
+  "textembedding-gecko@002": {
+    "shutdown_date": "2025-04-21",
+    "earliest": false
+  },
+  "textembedding-gecko@001": {
+    "shutdown_date": "2025-04-21",
+    "earliest": false
+  },
+  "imagetext": {
+    "shutdown_date": "2025-09-24",
+    "earliest": false
+  }
+}

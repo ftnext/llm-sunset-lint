@@ -1,7 +1,7 @@
 # Upstream Markdown sources
 
 This directory contains snapshots of the upstream Markdown documents used to
-maintain the model lifecycle data in `src/flake8_llm_sunset/checker.py`.
+maintain the model lifecycle data in `src/flake8_llm_sunset/model_shutdowns.json`.
 
 Run the updater from the repository root:
 

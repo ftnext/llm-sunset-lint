@@ -35,7 +35,8 @@ SOURCES = (
     "flake8-llm-sunset/sources/google-cloud/google-models.md",
     "flake8-llm-sunset/sources/google-cloud/model-versions.md",
 )
-FILES = (CHECKER, TESTS)
+MODEL_DATA = "flake8-llm-sunset/src/flake8_llm_sunset/model_shutdowns.json"
+FILES = (MODEL_DATA, TESTS)
 REVIEW_WORKFLOW = ".github/workflows/review-upstream-markdown-changes.yml"
 ISSUE_TITLE = "Upstream Markdown sources changed"
 MAX_BYTES = 1_000_000
@@ -379,47 +380,28 @@ def byte_span(source, node):
     return start, end
 
 
-def table_nodes(source):
-    tree = parse_python(source, CHECKER)
-    nodes = {}
-    for node in tree.body:
-        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-            name = node.targets[0].id
-            if name in {"MODEL_SHUTDOWNS", "EARLIEST_SHUTDOWNS"}:
-                require(name not in nodes, "Duplicate model table assignment.")
-                nodes[name] = node.value
-    require(set(nodes) == {"MODEL_SHUTDOWNS", "EARLIEST_SHUTDOWNS"}, "Missing expected model tables.")
-    return nodes
-
-
-def read_tables(source):
-    nodes = table_nodes(source)
-    shutdowns = nodes["MODEL_SHUTDOWNS"]
-    require(isinstance(shutdowns, ast.Dict), "MODEL_SHUTDOWNS must be a dictionary literal.")
+def read_model_data(source):
+    records = strict_json(source)
+    require(isinstance(records, dict) and 0 < len(records) <= 1000,
+            "Expected a bounded nonempty model data object.")
     models = {}
-    for key, value in zip(shutdowns.keys, shutdowns.values):
-        require(isinstance(key, ast.Constant) and isinstance(key.value, str), "Model IDs must be string literals.")
-        model = matched(key.value, MODEL_RE, "model ID")
-        require(model not in models, "Duplicate model ID in checker.")
-        require(isinstance(value, ast.Call) and isinstance(value.func, ast.Name)
-                and value.func.id == "date" and len(value.args) == 3 and not value.keywords
-                and all(isinstance(arg, ast.Constant) and type(arg.value) is int for arg in value.args),
-                "Shutdown dates must be date(year, month, day) constants.")
+    earliest = set()
+    for model, details in records.items():
+        matched(model, MODEL_RE, "model ID")
+        require(isinstance(details, dict) and set(details) == {"shutdown_date", "earliest"},
+                "Invalid model record fields.")
+        shutdown = details["shutdown_date"]
+        require(isinstance(shutdown, str) and re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", shutdown),
+                "Shutdown dates must use YYYY-MM-DD.")
         try:
-            models[model] = date(*(arg.value for arg in value.args)).isoformat()
+            date.fromisoformat(shutdown)
         except ValueError as error:
-            raise InvalidUpdate("Invalid checker shutdown date.") from error
-    earliest_node = nodes["EARLIEST_SHUTDOWNS"]
-    if isinstance(earliest_node, ast.Set):
-        require(all(isinstance(node, ast.Constant) and isinstance(node.value, str) for node in earliest_node.elts), "Earliest dates must be a set of model string literals.")
-        earliest = [node.value for node in earliest_node.elts]
-    else:
-        require(isinstance(earliest_node, ast.Call) and isinstance(earliest_node.func, ast.Name)
-                and earliest_node.func.id == "set" and not earliest_node.args and not earliest_node.keywords,
-                "EARLIEST_SHUTDOWNS must be a set literal (or empty set()).")
-        earliest = []
-    require(len(earliest) == len(set(earliest)) and set(earliest) <= set(models), "Invalid earliest-date model set.")
-    return models, set(earliest)
+            raise InvalidUpdate("Invalid model shutdown date.") from error
+        require(type(details["earliest"]) is bool, "Earliest must be a JSON boolean.")
+        models[model] = shutdown
+        if details["earliest"]:
+            earliest.add(model)
+    return models, earliest
 
 
 def test_partition(source):
@@ -578,15 +560,18 @@ def validate_tests(original, candidate):
             ) for child in ast.walk(node)
         ), "New regression tests must call check() and assert on its result.")
 
-    for node in new.values():
+    for name, node in new.items():
         require(any(isinstance(child, ast.Assert) for child in ast.walk(node)), "Every test must retain an assertion.")
         require(not node.args.defaults and not any(node.args.kw_defaults)
                 and node.returns is None
                 and all(arg.annotation is None for arg in [*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs])
                 and node.args.vararg is None and node.args.kwarg is None,
                 "Test signatures must not execute defaults or annotations.")
-        for decorator in node.decorator_list:
-            literal_decorator(decorator)
+        # Existing decorators retain their trusted AST structure, including
+        # JSON-driven MODEL_DATA.items(); generated decorators must be literals.
+        if name not in old:
+            for decorator in node.decorator_list:
+                literal_decorator(decorator)
         for child in ast.walk(node):
             if isinstance(child, ast.Attribute):
                 require(child.attr not in {"skip", "skipif", "xfail"}, "Tests may not disable regression coverage.")
@@ -613,30 +598,17 @@ def reconstruct(original, response):
             and len(earliest) == len(set(earliest)) and set(earliest) <= set(models), "Invalid earliest-shutdown set.")
     text_value(response["summary"], "summary", 2000)
     tests = text_value(response["tests"], "generated tests", MAX_RESPONSE_BYTES)
-    old_models, old_earliest = read_tables(original[CHECKER])
-    require((models, set(earliest)) != (old_models, old_earliest), "No semantic model table change was proposed.")
+    old_models, old_earliest = read_model_data(original[MODEL_DATA])
+    require((models, set(earliest)) != (old_models, old_earliest), "No semantic model data change was proposed.")
     model_order = [model for model in old_models if model in models] + sorted(set(models) - set(old_models))
-    nodes = table_nodes(original[CHECKER])
-    old_earliest_order = [node.value for node in nodes["EARLIEST_SHUTDOWNS"].elts] if isinstance(nodes["EARLIEST_SHUTDOWNS"], ast.Set) else []
-    earliest_order = [model for model in old_earliest_order if model in earliest] + sorted(set(earliest) - old_earliest)
-    rendered_models = "{\n" + "".join(
-        f"    {json.dumps(model)}: date({', '.join(str(int(part)) for part in models[model].split('-'))}),\n"
+    records = {
+        model: {"shutdown_date": models[model], "earliest": model in earliest}
         for model in model_order
-    ) + "}"
-    rendered_earliest = "{\n" + "".join(f"    {json.dumps(model)},\n" for model in earliest_order) + "}" if earliest else "set()"
-    raw = original[CHECKER].encode("utf-8")
-    replacements = {}
-    if models != old_models:
-        replacements["MODEL_SHUTDOWNS"] = rendered_models
-    if set(earliest) != old_earliest:
-        replacements["EARLIEST_SHUTDOWNS"] = rendered_earliest
-    spans = [(byte_span(original[CHECKER], nodes[name]), value) for name, value in replacements.items()]
-    for (start, end), value in sorted(spans, reverse=True):
-        raw = raw[:start] + value.encode("utf-8") + raw[end:]
-    checker = raw.decode("utf-8")
-    require(read_tables(checker) == (models, set(earliest)), "Reconstructed tables do not match model data.")
+    }
+    model_data = json.dumps(records, indent=2, ensure_ascii=False) + "\n"
+    require(read_model_data(model_data) == (models, set(earliest)), "Reconstructed JSON does not match model data.")
     validate_tests(original[TESTS], tests)
-    return {CHECKER: checker, TESTS: tests}
+    return {MODEL_DATA: model_data, TESTS: tests}
 
 
 def command_prepare(args):
@@ -647,7 +619,9 @@ def command_prepare(args):
     template = git_file(provenance["base_sha"], ".github/prompts/implement-upstream-update.md")
     prompt = template + "\n\n" + "\n\n".join(
         f"<{name}>\n{content}\n</{name}>" for name, content in (
-            ("TRUSTED_CHECKER", original[CHECKER]), ("TRUSTED_TESTS", original[TESTS]),
+            ("TRUSTED_CHECKER", git_file(provenance["base_sha"], CHECKER)),
+            ("TRUSTED_MODEL_SHUTDOWNS", original[MODEL_DATA]),
+            ("TRUSTED_TESTS", original[TESTS]),
             ("UNTRUSTED_UPSTREAM_DIFF", diff),
         )
     )
@@ -738,7 +712,7 @@ def command_publish(args):
         entries.append({"path": path, "mode": "100644", "type": "blob", "sha": matched(blob.get("sha"), SHA_RE, "blob SHA")})
     tree = api(f"{endpoint}/trees", method="POST", data={"base_tree": tree_sha, "tree": entries})
     commit = api(f"{endpoint}/commits", method="POST", data={
-        "message": f"Update model shutdown tables for upstream issue #{values['issue_number']}",
+        "message": f"Update model shutdown data for upstream issue #{values['issue_number']}",
         "tree": matched(tree.get("sha"), SHA_RE, "tree SHA"), "parents": [provenance["base_sha"]],
         "author": {"name": "github-actions[bot]", "email": "41898282+github-actions[bot]@users.noreply.github.com"},
     })
@@ -768,7 +742,7 @@ def command_publish(args):
         f"Review run: https://github.com/{repository}/actions/runs/{values['review_run_id']}\n"
         f"Pinned base: {provenance['base_sha']}\n"
         f"Generator model: {candidate['model']}\n\n"
-        "This draft changes only the two shutdown tables and regression tests. "
+        "This draft changes only model_shutdowns.json and regression tests. "
         "The candidate passed the isolated Python test matrix before publication. "
         "Please verify the retirement dates against the linked upstream source diff.\n"
     )

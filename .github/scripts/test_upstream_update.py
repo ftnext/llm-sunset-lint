@@ -29,16 +29,8 @@ SPEC = importlib.util.spec_from_file_location(
 updater = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(updater)
 
-CHECKER = '''from datetime import date
-
-# Keep Unicode and every byte outside the two values: café.
-MODEL_SHUTDOWNS = {"old-model": date(2026, 10, 20)}
-EARLIEST_SHUTDOWNS = set()
-
-class Checker:
-    def run(self):
-        return MODEL_SHUTDOWNS
-'''
+CHECKER = (Path(__file__).resolve().parents[2] / updater.CHECKER).read_text()
+MODEL_DATA = json.dumps({"old-model": {"shutdown_date": "2026-10-20", "earliest": False}}) + "\n"
 TESTS = '''import pytest
 
 
@@ -301,21 +293,15 @@ class GitHubValidationTests(unittest.TestCase):
 
 class ReconstructionTests(unittest.TestCase):
     def setUp(self):
-        self.original = {updater.CHECKER: CHECKER, updater.TESTS: TESTS}
+        self.original = {updater.MODEL_DATA: MODEL_DATA, updater.TESTS: TESTS}
 
-    def test_reconstruction_only_replaces_literal_values_not_executable_code(self):
+    def test_reconstruction_only_emits_json_data_and_tests(self):
         generated = updater.reconstruct(self.original, response())
-        self.assertEqual(updater.read_tables(generated[updater.CHECKER]),
+        self.assertEqual(updater.read_model_data(generated[updater.MODEL_DATA]),
                          (response()["model_shutdowns"], {"new-model"}))
-        def masked(source):
-            raw = source.encode("utf-8")
-            spans = [updater.byte_span(source, node) for node in updater.table_nodes(source).values()]
-            for start, end in sorted(spans, reverse=True):
-                raw = raw[:start] + b"<TABLE>" + raw[end:]
-            return raw
-        self.assertEqual(masked(generated[updater.CHECKER]), masked(CHECKER))
         self.assertEqual(generated[updater.TESTS], NEW_TESTS)
         self.assertEqual(set(generated), set(updater.FILES))
+        self.assertNotIn(updater.CHECKER, generated)
 
     def test_response_ambiguous_unknown_fields_bad_dates_and_subset_fail(self):
         for changes in (
@@ -330,18 +316,22 @@ class ReconstructionTests(unittest.TestCase):
             with self.subTest(changes=changes), self.assertRaises(updater.InvalidUpdate):
                 updater.reconstruct(self.original, response(**changes))
 
-    def test_checker_tables_cannot_contain_calls_unpacking_duplicates_or_bad_dates(self):
-        for table in ('dict(x=date(2027, 1, 1))', '{**other}', '{"x": evil()}',
-                      '{"x": date(True, 1, 1)}', '{"x": date(2027, 2, 29)}',
-                      '{"x": date(2027, 1, 1), "x": date(2027, 2, 1)}'):
-            source = f"MODEL_SHUTDOWNS = {table}\nEARLIEST_SHUTDOWNS = set()\n"
-            with self.subTest(table=table), self.assertRaises(updater.InvalidUpdate):
-                updater.read_tables(source)
-        for earliest in ('set(["old-model"])', '{"missing"}', '{"old-model", "old-model"}'):
-            with self.subTest(earliest=earliest), self.assertRaises(updater.InvalidUpdate):
-                updater.read_tables(CHECKER.replace("set()", earliest))
-        with self.assertRaises(updater.InvalidUpdate):
-            updater.read_tables(CHECKER + '\nMODEL_SHUTDOWNS = {}\n')
+    def test_model_data_rejects_invalid_schema_dates_booleans_and_duplicates(self):
+        for raw in (
+            '{}', '[]', 'null', CHECKER,
+            '{"x": {"shutdown_date": "2027-01-01", "earliest": false}, "x": {}}',
+            '{"x": {"shutdown_date": "2027-01-01", "earliest": false, "earliest": true}}',
+            *[json.dumps({"x": details}) for details in (
+                None, {}, {"shutdown_date": "2027-01-01", "earliest": False, "extra": 1},
+                {"shutdown_date": "2027-02-29", "earliest": False},
+                {"shutdown_date": "2027-1-01", "earliest": False},
+                {"shutdown_date": 20270101, "earliest": False},
+                {"shutdown_date": "2027-01-01", "earliest": 1},
+                {"shutdown_date": "2027-01-01", "earliest": "false"},
+            )],
+        ):
+            with self.subTest(raw=raw), self.assertRaises(updater.InvalidUpdate):
+                updater.read_model_data(raw)
 
     def test_tests_preserve_existing_names_and_non_test_code_add_assertions(self):
         updater.validate_tests(TESTS, NEW_TESTS)
@@ -425,14 +415,31 @@ def test_new_shutdown():
                 updater.validate_tests(TESTS, prefix + NEW_TESTS)
         updater.validate_tests(TESTS, '# coding: utf-8\n' + NEW_TESTS)
 
-    def test_reconstruction_preserves_order_and_unchanged_table_bytes(self):
-        changed = updater.reconstruct(self.original, response(earliest_shutdowns=[]))[updater.CHECKER]
-        self.assertIn("EARLIEST_SHUTDOWNS = set()", changed)
+    def test_reconstruction_preserves_order_dates_and_earliest_semantics(self):
+        changed = updater.reconstruct(self.original, response(earliest_shutdowns=[]))[updater.MODEL_DATA]
         self.assertLess(changed.index('"old-model"'), changed.index('"new-model"'))
+        self.assertFalse(json.loads(changed)["new-model"]["earliest"])
         changed = updater.reconstruct(self.original, response(
             model_shutdowns={"old-model": "2026-10-20"}, earliest_shutdowns=["old-model"],
-        ))[updater.CHECKER]
-        self.assertIn('MODEL_SHUTDOWNS = {"old-model": date(2026, 10, 20)}', changed)
+        ))[updater.MODEL_DATA]
+        self.assertEqual(json.loads(changed), {
+            "old-model": {"shutdown_date": "2026-10-20", "earliest": True},
+        })
+
+    def test_current_repository_json_checker_and_data_driven_tests_are_supported(self):
+        root = Path(__file__).resolve().parents[2]
+        original = {path: (root / path).read_text() for path in updater.FILES}
+        models, earliest = updater.read_model_data(original[updater.MODEL_DATA])
+        models["regression-new-model"] = "2030-01-01"
+        tests = original[updater.TESTS] + '\n\ndef test_new_fixed_shutdown():\n    assert check(\'MODEL = "regression-new-model"\', date(2030, 1, 1))[0][2].startswith("LSG001")\n'
+        checker = (root / updater.CHECKER).read_bytes()
+        generated = updater.reconstruct(original, response(
+            model_shutdowns=models, earliest_shutdowns=sorted(earliest), tests=tests,
+        ))
+        self.assertNotIn(updater.CHECKER, generated)
+        self.assertEqual((root / updater.CHECKER).read_bytes(), checker)
+        self.assertEqual(updater.read_model_data(generated[updater.MODEL_DATA]), (models, earliest))
+
 
 
 class RepositoryCase(unittest.TestCase):
@@ -454,7 +461,7 @@ class RepositoryCase(unittest.TestCase):
         self.addCleanup(self.env.stop)
         self.git("init", "-q", "--initial-branch=main")
         for path, contents in {
-            updater.CHECKER: CHECKER, updater.TESTS: TESTS,
+            updater.CHECKER: CHECKER, updater.MODEL_DATA: MODEL_DATA, updater.TESTS: TESTS,
             updater.SOURCES[0]: "Original source A\n", updater.SOURCES[1]: "Original source B\n",
             ".github/prompts/implement-upstream-update.md": "Generate strict JSON from the diff.\n",
             "README.md": "Unchanged trusted file.\n",
@@ -610,6 +617,7 @@ class SourceTests(RepositoryCase):
         self.assertEqual(updater.main(["prepare", "--provenance", "validated.json", "--output", "prompt.txt"]), 0)
         prompt = Path("prompt.txt").read_text()
         self.assertIn("<TRUSTED_CHECKER>\n" + CHECKER, prompt)
+        self.assertIn("<TRUSTED_MODEL_SHUTDOWNS>\n" + MODEL_DATA, prompt)
         self.assertIn("<TRUSTED_TESTS>\n" + TESTS, prompt)
         self.assertIn("<UNTRUSTED_UPSTREAM_DIFF>", prompt)
         self.assertIn("+New source A", prompt)
@@ -638,15 +646,35 @@ class ArtifactTests(RepositoryCase):
             self.assertEqual(Path(path).read_text(), candidate["files"][path]["content"])
         self.assertEqual(self.posts(), [])
 
+    def test_real_json_build_and_apply_preserves_checker_and_existing_tests(self):
+        root = Path(__file__).resolve().parents[2]
+        for path in updater.FILES:
+            self.write(path, (root / path).read_text())
+        self.base = self.commit("Use current JSON data and data-driven tests")
+        self.provenance = provenance(self.values, self.base)
+        models, earliest = updater.read_model_data(Path(updater.MODEL_DATA).read_text())
+        models["regression-new-model"] = "2030-01-01"
+        tests = Path(updater.TESTS).read_text() + '\n\ndef test_generated_regression():\n    assert check(\'MODEL = "regression-new-model"\', date(2030, 1, 1))[0][2].startswith("LSG001")\n'
+        candidate = self.build(response(
+            model_shutdowns=models, earliest_shutdowns=sorted(earliest), tests=tests,
+        ))
+        updater.command_apply(SimpleNamespace(artifact="artifact"))
+        self.assertEqual(set(self.git("diff", "--name-only").splitlines()), set(updater.FILES))
+        self.assertEqual(Path(updater.CHECKER).read_text(), CHECKER)
+        self.assertEqual(Path(updater.TESTS).read_text(), tests)
+        self.assertEqual(updater.read_model_data(Path(updater.MODEL_DATA).read_text()), (models, earliest))
+        self.assertEqual(set(candidate["files"]), {updater.MODEL_DATA, updater.TESTS})
+
     def test_artifact_rejects_content_hash_base_hash_model_and_extra_paths(self):
         original = self.build()
         mutations = [
-            lambda c: c["files"][updater.CHECKER].update(content=CHECKER + "\nprint('bad')\n"),
-            lambda c: c["files"][updater.CHECKER].update(sha256="0" * 64),
-            lambda c: c["files"][updater.CHECKER].update(content="bad", sha256=updater.sha256("bad")),
+            lambda c: c["files"][updater.MODEL_DATA].update(content=CHECKER + "\nprint('bad')\n"),
+            lambda c: c["files"][updater.MODEL_DATA].update(sha256="0" * 64),
+            lambda c: c["files"][updater.MODEL_DATA].update(content="bad", sha256=updater.sha256("bad")),
             lambda c: c["files"][updater.TESTS].update(base_sha256="0" * 64),
             lambda c: c["response"]["model_shutdowns"].update({"new-model": "2027-03-01"}),
             lambda c: c["files"].update({"README.md": {"content": "bad"}}),
+            lambda c: c["files"].update({updater.CHECKER: {"content": CHECKER}}),
             lambda c: c.update(model="other-model"),
             lambda c: c.update(extra=True),
             lambda c: c["provenance"].update(base_sha="7" * 40),
@@ -685,6 +713,7 @@ class ArtifactTests(RepositoryCase):
         with self.assertRaises(updater.InvalidUpdate):
             updater.command_apply(SimpleNamespace(artifact="artifact"))
         self.assertEqual(Path(updater.CHECKER).read_text(), CHECKER)
+        self.assertEqual(Path(updater.MODEL_DATA).read_text(), MODEL_DATA)
         self.assertIn("Local edit", Path(updater.TESTS).read_text())
 
     def test_apply_rejects_worktree_executable_or_symlink(self):
@@ -699,6 +728,7 @@ class ArtifactTests(RepositoryCase):
         with self.assertRaises(updater.InvalidUpdate):
             updater.command_apply(SimpleNamespace(artifact="artifact"))
         self.assertEqual(Path(updater.CHECKER).read_text(), CHECKER)
+        self.assertEqual(Path(updater.MODEL_DATA).read_text(), MODEL_DATA)
 
     def test_build_never_overwrites_nonempty_artifact(self):
         self.build()

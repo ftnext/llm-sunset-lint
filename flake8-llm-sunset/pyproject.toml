@@ -36,3 +36,6 @@ test = ["pytest>=9"]
 
 [tool.pytest]
 testpaths = ["tests"]
+
+[tool.setuptools.package-data]
+flake8_llm_sunset = ["model_shutdowns.json"]

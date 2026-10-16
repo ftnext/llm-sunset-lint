@@ -30,13 +30,16 @@ reliably start another workflow).
    overwrites an existing branch. Main may still advance after the final check;
    the PR always records its exact tested base for human review.
 
-The model can change only the two checker tables and `tests/test_checker.py`.
-The helper renders table literals itself, preserves all other checker bytes,
-retains existing test structure (allowing factual literal updates) and non-test
-module code, and requires new regression coverage. New tests use a narrow
-assertion-only language. The original issue body is not used as a prompt: the
-validated Git source diff provides the evidence. Passing tests is a publication gate, not
-proof that generated facts or tests are correct; the Draft PR requires review.
+The model can change only `model_shutdowns.json` and `tests/test_checker.py`.
+The helper validates dates and boolean earliest flags and renders JSON itself.
+`checker.py` is read-only prompt context and is excluded from candidate artifacts.
+Existing test structure (allowing factual literal updates) and non-test module
+code, including trusted JSON-driven parametrization, are preserved. New tests
+must add regression coverage using a narrow assertion-only language and literal
+parametrization. Existing decorators retain their trusted structure.
+The original issue body is not used as a prompt: the validated Git source diff
+provides the evidence. Passing tests is a publication gate, not proof that
+generated facts or tests are correct; the Draft PR requires review.
 
 ## Requirements and failure handling
 

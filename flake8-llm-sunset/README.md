@@ -21,6 +21,17 @@ and [Google models](https://docs.cloud.google.com/gemini-enterprise-agent-platfo
 Markdown sources.
 Models without an announced retirement date are not checked.
 
+Retirement dates are stored in `src/flake8_llm_sunset/model_shutdowns.json`
+and bundled with the package. Each model ID maps to a `shutdown_date` in
+`YYYY-MM-DD` format and an `earliest` boolean. Set `earliest` to `true` when
+the provider says the model may retire "on or after" that date, or `false`
+for a fixed retirement date.
+
+To add or update a model, edit this JSON file and run `pytest`. The shared
+tests automatically check every entry before the warning window, at the start
+of the window, and before, on, and after the retirement date. No model-specific
+test needs to be added for a data-only update.
+
 The two upstream Markdown documents are also stored under
 `sources/google-cloud/` for maintenance. Run
 `python scripts/fetch_markdown_sources.py` to refresh them. These snapshots are
