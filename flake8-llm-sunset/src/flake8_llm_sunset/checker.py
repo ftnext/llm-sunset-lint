@@ -6,6 +6,7 @@ import ast
 import calendar
 import json
 import re
+from dataclasses import dataclass
 from datetime import date
 from importlib.resources import files
 from typing import Iterator
@@ -13,24 +14,36 @@ from typing import Iterator
 
 ERROR_CODE_PREFIX = "LSG"
 
+
+@dataclass(frozen=True)
+class ModelCatalog:
+    shutdowns: dict[str, date]
+    earliest: set[str]
+    pattern: re.Pattern[str]
+
+    @classmethod
+    def from_json(cls, text: str) -> ModelCatalog:
+        data = json.loads(text)
+        shutdowns = {
+            model: date.fromisoformat(details["shutdown_date"])
+            for model, details in data.items()
+        }
+        earliest = {
+            model for model, details in data.items() if details["earliest"]
+        }
+        model_ids = sorted(shutdowns, key=len, reverse=True)
+        alternatives = "|".join(re.escape(model) for model in model_ids)
+        pattern = re.compile(
+            rf"(?<![A-Za-z0-9_.-])({alternatives})(?![A-Za-z0-9_.-])"
+        )
+        return cls(shutdowns, earliest, pattern)
+
+
 # Lifecycle data is bundled with the package; no network access is needed.
-_MODEL_DATA = json.loads(
+_MODEL_CATALOG = ModelCatalog.from_json(
     files(__package__)
     .joinpath("model_shutdowns.json")
     .read_text(encoding="utf-8")
-)
-MODEL_SHUTDOWNS = {
-    model: date.fromisoformat(details["shutdown_date"])
-    for model, details in _MODEL_DATA.items()
-}
-EARLIEST_SHUTDOWNS = {
-    model for model, details in _MODEL_DATA.items() if details["earliest"]
-}
-
-_MODEL_IDS = sorted(MODEL_SHUTDOWNS, key=len, reverse=True)
-_MODEL_ALTERNATIVES = "|".join(re.escape(model) for model in _MODEL_IDS)
-_MODEL_PATTERN = re.compile(
-    rf"(?<![A-Za-z0-9_.-])({_MODEL_ALTERNATIVES})(?![A-Za-z0-9_.-])"
 )
 
 
@@ -58,6 +71,7 @@ class ModelExpiryChecker:
     name = "flake8-llm-sunset"
     version = "0.0.6"
     today = staticmethod(date.today)
+    catalog = _MODEL_CATALOG
 
     def __init__(self, tree: ast.AST) -> None:
         self.tree = tree
@@ -67,29 +81,34 @@ class ModelExpiryChecker:
     ) -> Iterator[tuple[int, int, str, type["ModelExpiryChecker"]]]:
         current_date = self.today()
         for node in ast.walk(self.tree):
-            if not isinstance(node, ast.Constant) or not isinstance(node.value, str):
+            if not isinstance(node, ast.Constant) or not isinstance(
+                node.value, str
+            ):
                 continue
-            for match in _MODEL_PATTERN.finditer(node.value):
+            for match in self.catalog.pattern.finditer(node.value):
                 model = match.group(1)
-                shutdown = MODEL_SHUTDOWNS[model]
+                shutdown = self.catalog.shutdowns[model]
                 if current_date < one_month_before(shutdown):
                     continue
 
-                if model in EARLIEST_SHUTDOWNS:
-                    status = f"may shut down on or after {shutdown.isoformat()}"
+                if model in self.catalog.earliest:
+                    status = (
+                        f"may shut down on or after {shutdown.isoformat()}"
+                    )
                 elif current_date >= shutdown:
                     status = f"was shut down on {shutdown.isoformat()}"
                 else:
                     days = (shutdown - current_date).days
                     status = (
-                        f"shuts down on {shutdown.isoformat()} ({days} days remaining)"
+                        f"shuts down on {shutdown.isoformat()} "
+                        f"({days} days remaining)"
                     )
 
                 code_number = "001" if current_date >= shutdown else "002"
                 code = f"{ERROR_CODE_PREFIX}{code_number}"
 
-                # col_offset points to the opening quote; the exact offset inside a
-                # string is deliberately not reconstructed from source spelling.
+                # col_offset points to the opening quote. The offset within
+                # the string is not reconstructed from source spelling.
                 yield (
                     node.lineno,
                     node.col_offset,
