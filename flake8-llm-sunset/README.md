@@ -27,10 +27,11 @@ and bundled with the package. Each model ID maps to a `shutdown_date` in
 the provider says the model may retire "on or after" that date, or `false`
 for a fixed retirement date.
 
-To add or update a model, edit this JSON file and run `pytest`. The shared
-tests automatically check every entry before the warning window, at the start
-of the window, and before, on, and after the retirement date. No model-specific
-test needs to be added for a data-only update.
+To add or update a model, edit this JSON file and run `pytest`. The data tests
+automatically validate every entry and check that the checker loads all bundled
+models. Lifecycle behavior is tested separately using two fixed JSON entries,
+covering both fixed and earliest retirement dates at the warning and retirement
+boundaries. No model-specific test needs to be added for a data-only update.
 
 The two upstream Markdown documents are also stored under
 `sources/google-cloud/` for maintenance. Run
