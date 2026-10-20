@@ -8,11 +8,10 @@ version = "0.0.6"
 description = "A flake8 plugin that warns about expiring LLM model IDs"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT License" }
+license = "MIT"
 authors = [{ name = "nikkie", email = "takuyafjp+develop@gmail.com" }]
 keywords = ["flake8"]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
