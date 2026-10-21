@@ -48,8 +48,6 @@ months after initial release:
 
 | Model ID | Release date | Retirement date | Replacement model ID |
 |---|---|---|---|
-| [`veo-3.0-generate-001`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-0-generate#3.0-generate-001) | July 29, 2025 | June 30, 2026 | [`veo-3.1-generate-001`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-generate-001) |
-| [`veo-3.0-fast-generate-001`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-0-generate#3.0-fast-generate-001) | July 29, 2025 | June 30, 2026 | [`veo-3.1-fast-generate-001`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-fast-generate-001) |
 | [`veo-3.1-generate-001`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-generate-001) | November 17, 2025 | November 17, 2026 or later |   |
 | [`veo-3.1-fast-generate-001`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-fast-generate-001) | November 17, 2025 | November 17, 2026 or later |   |
 
@@ -96,6 +94,9 @@ The following table lists models available for shorter terms:
 
 | Model ID | Release date | Retirement date | Recommended upgrade |
 |---|---|---|---|
+| `veo-3.0-generate-001` | July 29, 2025 | June 30, 2026 | [`veo-3.1-generate-001`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-generate-001) |
+| `veo-3.0-fast-generate-001` | July 29, 2025 | June 30, 2026 | [`veo-3.1-fast-generate-001`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-fast-generate-001) |
+| `veo-2.0-generate-001` | May 27, 2025 | June 30, 2026 | [`veo-3.1-generate-001`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-generate-001) |
 | `gemini-2.0-flash` | February 5, 2025 | June 1, 2026 | [`gemini-3.5-flash-lite`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite) |
 | `gemini-2.0-flash-lite` | February 25, 2025 | June 1, 2026 | [`gemini-3.5-flash-lite`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite) |
 | `gemini-1.5-pro-001` | May 24, 2024 | May 24, 2025 | [`gemini-2.5-flash`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/2-5-flash) |

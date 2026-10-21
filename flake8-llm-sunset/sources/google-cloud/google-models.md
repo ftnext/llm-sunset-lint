@@ -50,7 +50,7 @@ Turn ideas into production-ready assets
 
 ## Veo models
 
-[Veo 3 Generate](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-0-generate#3.0-generate-001) Generates videos from text prompts and images with high quality. [Veo 3 Fast](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-0-generate#3.0-fast-generate-001) Generates videos from text prompts and images with high quality and low latency. [Veo 3.1 Generate](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-generate-001) Generates videos from text prompts and images with high quality. [Veo 3.1 Fast](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-fast-generate-001) Generates videos from text prompts and images with high quality and low latency.
+[Veo 3.1 Generate](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-generate-001) Generates videos from text prompts and images with high quality. [Veo 3.1 Fast](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-fast-generate-001) Generates videos from text prompts and images with high quality and low latency.
 
 ## Preview Veo models
 
