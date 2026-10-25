@@ -186,5 +186,41 @@
   "imagetext": {
     "shutdown_date": "2025-09-24",
     "earliest": false
+  },
+  "imagegeneration@002": {
+    "shutdown_date": "2026-06-30",
+    "earliest": false
+  },
+  "imagegeneration@003": {
+    "shutdown_date": "2026-06-30",
+    "earliest": false
+  },
+  "imagegeneration@004": {
+    "shutdown_date": "2026-06-30",
+    "earliest": false
+  },
+  "imagegeneration@005": {
+    "shutdown_date": "2026-06-30",
+    "earliest": false
+  },
+  "imagegeneration@006": {
+    "shutdown_date": "2026-06-30",
+    "earliest": false
+  },
+  "imagen-3.0-generate-001": {
+    "shutdown_date": "2026-06-30",
+    "earliest": false
+  },
+  "imagen-3.0-generate-002": {
+    "shutdown_date": "2026-06-30",
+    "earliest": false
+  },
+  "imagen-4.0-generate-001": {
+    "shutdown_date": "2026-06-30",
+    "earliest": false
+  },
+  "imagen-4.0-ultra-generate-001": {
+    "shutdown_date": "2026-06-30",
+    "earliest": false
   }
 }
