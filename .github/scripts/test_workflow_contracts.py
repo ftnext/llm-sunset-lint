@@ -52,6 +52,20 @@ class ClassifierGateTests(unittest.TestCase):
 
 
 class WorkflowIsolationTests(unittest.TestCase):
+    def test_failed_generation_keeps_only_response_as_short_lived_diagnostic(self):
+        workflow = (WORKFLOWS / "implement-upstream-markdown-changes.yml").read_text()
+        diagnostic = workflow.split("- name: Preserve failed generation response for diagnosis", 1)[1]
+        diagnostic = diagnostic.split("      - uses:", 1)[0]
+        self.assertIn("failure()", diagnostic)
+        self.assertIn("steps.generate.outcome == 'failure'", diagnostic)
+        self.assertIn("steps.build.outcome == 'failure'", diagnostic)
+        self.assertIn("name: upstream-generation-response", diagnostic)
+        self.assertIn("path: ${{ runner.temp }}/response.json", diagnostic)
+        self.assertIn("retention-days: 3", diagnostic)
+        self.assertNotIn("continue-on-error", workflow)
+        self.assertNotIn("copilot-home/", diagnostic)
+        self.assertNotIn("copilot-cache/", diagnostic)
+
     def test_publish_requires_successful_matrix_and_runs_only_trusted_helper(self):
         workflow = (WORKFLOWS / "implement-upstream-markdown-changes.yml").read_text()
         publish = workflow.split("\n  publish:\n", 1)[1]

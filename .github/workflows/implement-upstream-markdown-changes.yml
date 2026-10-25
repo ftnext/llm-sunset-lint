@@ -91,6 +91,7 @@ jobs:
             --provenance "$RUNNER_TEMP/provenance/provenance.json" \
             --output "$RUNNER_TEMP/implementation-prompt.txt"
       - name: Generate candidate without tools
+        id: generate
         env:
           COPILOT_CACHE_HOME: ${{ runner.temp }}/copilot-cache
           COPILOT_HOME: ${{ runner.temp }}/copilot-home
@@ -114,11 +115,20 @@ jobs:
             -p "$(< "$RUNNER_TEMP/implementation-prompt.txt")" \
             > "$RUNNER_TEMP/response.json"
       - name: Validate and package candidate as data
+        id: build
         run: |
           python .github/scripts/upstream_update.py build \
             --provenance "$RUNNER_TEMP/provenance/provenance.json" \
             --response "$RUNNER_TEMP/response.json" \
             --artifact "$RUNNER_TEMP/candidate"
+      - name: Preserve failed generation response for diagnosis
+        if: ${{ failure() && (steps.generate.outcome == 'failure' || steps.build.outcome == 'failure') }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: upstream-generation-response
+          path: ${{ runner.temp }}/response.json
+          if-no-files-found: warn
+          retention-days: 3
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: upstream-candidate

@@ -72,21 +72,32 @@ def matched(value, pattern, label):
     return value
 
 
-def strict_json(raw):
+def strict_json(raw, label="JSON input"):
     def pairs(items):
         result = {}
         for key, value in items:
-            require(key not in result, f"Duplicate JSON key: {key!r}.")
+            require(key not in result, "Duplicate JSON key.")
             result[key] = value
         return result
 
     def constant(value):
-        raise InvalidUpdate(f"Non-finite JSON value: {value}.")
+        raise InvalidUpdate("Non-finite JSON value.")
 
     try:
         return json.loads(raw, object_pairs_hook=pairs, parse_constant=constant)
     except (ValueError, UnicodeError) as error:
-        raise InvalidUpdate("Expected one strict UTF-8 JSON document.") from error
+        # Never include source excerpts, key names or values in CI logs.
+        size = len(raw) if isinstance(raw, bytes) else len(raw.encode("utf-8", errors="replace"))
+        detail = type(error).__name__
+        if isinstance(error, json.JSONDecodeError):
+            detail += f" at line {error.lineno}, column {error.colno}, character {error.pos}"
+        elif isinstance(error, UnicodeDecodeError):
+            detail += f" at byte {error.start}"
+        elif isinstance(error, InvalidUpdate):
+            detail += f" ({error})"
+        raise InvalidUpdate(
+            f"{label}: Expected one strict UTF-8 JSON document; {size} bytes; {detail}."
+        ) from error
 
 
 def text_value(value, label, limit=MAX_BYTES):
@@ -113,7 +124,7 @@ def regular_path(path, *, exists=True):
 def read_json(path, limit=MAX_BYTES):
     path = regular_path(path)
     require(path.stat().st_size <= limit, "JSON input is too large.")
-    return strict_json(path.read_bytes())
+    return strict_json(path.read_bytes(), label=path.name)
 
 
 def write_json(path, value):

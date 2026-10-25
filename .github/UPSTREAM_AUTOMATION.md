@@ -57,6 +57,12 @@ generated facts or tests are correct; the Draft PR requires review.
   reruns will not overwrite it.
 - A changed main or newer upstream snapshot stops the run. Dispatch a fresh
   review against the appropriate source commit after checking the open issue.
+- Generation or candidate-validation failures retain only raw `response.json` in
+  `upstream-generation-response` for three days. Treat it as untrusted data;
+  never execute its contents or pass it to the candidate publication path.
+  Copilot home/cache and credentials are not included. Parser diagnostics name
+  the input, byte count, exception type and available error position without
+  printing response excerpts, key names or values.
 - Failures remain visible in Actions and leave the issue open for manual work.
   There is no automatic merge, assignment, retry loop, or production updater
   run as part of workflow development.

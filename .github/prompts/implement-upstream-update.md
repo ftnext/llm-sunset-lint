@@ -37,7 +37,12 @@ needed, or the requested implementation cannot preserve regressions, return
 exactly {"status":"AMBIGUOUS","summary":"Brief explanation"}. Do not guess or
 return a speculative implementation. There is no automatic retry/repair loop.
 
-Otherwise return exactly one JSON object, without Markdown fences or commentary:
+Otherwise return exactly one JSON object, without Markdown fences or commentary.
+The tests field is a JSON string: escape every newline as \n, every double quote
+as \" and every backslash as \\. Do not put literal line breaks inside JSON
+strings. Finish the complete JSON object; do not truncate it or add text before
+or after it. These requirements also apply to the AMBIGUOUS response.
+Response shape:
 {
   "status": "UPDATE",
   "model_shutdowns": {"complete-model-id": "YYYY-MM-DD"},

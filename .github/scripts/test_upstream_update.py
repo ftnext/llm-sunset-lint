@@ -173,6 +173,29 @@ class InputTests(unittest.TestCase):
                 updater.strict_json(raw)
         self.assertEqual(updater.strict_json('{"x": 1}'), {"x": 1})
 
+    def test_json_diagnostics_identify_input_without_exposing_content(self):
+        cases = (
+            (b'', 'JSONDecodeError', 'line 1, column 1'),
+            (b'```json\n{}\n```', 'JSONDecodeError', 'line 1, column 1'),
+            (b'private-prefix {}', 'JSONDecodeError', 'line 1, column 1'),
+            (b'{} {}', 'JSONDecodeError', 'line 1, column 4'),
+            (b'{"tests":"private\ntext"}', 'JSONDecodeError', 'line 1, column 18'),
+            (b'{"private-key":1,"private-key":2}', 'InvalidUpdate', 'Duplicate JSON key'),
+            (b'{"private-key":NaN}', 'InvalidUpdate', 'Non-finite JSON value'),
+            (b'"\xff"', 'UnicodeDecodeError', 'byte 1'),
+        )
+        for raw, kind, position in cases:
+            with self.subTest(raw=raw), self.assertRaises(updater.InvalidUpdate) as caught:
+                updater.strict_json(raw, label="response.json")
+            message = str(caught.exception)
+            self.assertIn("response.json:", message)
+            self.assertIn(f"{len(raw)} bytes", message)
+            self.assertIn(kind, message)
+            self.assertIn(position, message)
+            self.assertNotIn("private", message)
+        self.assertEqual(updater.strict_json(b'{"tests":"line1\\nline2"}'),
+                         {"tests": "line1\nline2"})
+
     def test_model_must_be_configured_and_well_formed(self):
         for value in (None, "", "model\n", "model;exec"):
             env = {} if value is None else {"UPDATER_MODEL": value}
@@ -633,6 +656,19 @@ class SourceTests(RepositoryCase):
 
 
 class ArtifactTests(RepositoryCase):
+    def test_malformed_response_never_builds_or_publishes_candidate(self):
+        updater.write_json("provenance.json", self.provenance)
+        for raw in (b'', b'```json\n{}\n```', b'{} {}', b'{"tests":"private\ntext"}'):
+            with self.subTest(raw=raw):
+                Path("response.json").write_bytes(raw)
+                with patch.object(updater, "reconstruct") as reconstruct:
+                    with self.assertRaisesRegex(updater.InvalidUpdate, "response.json:"):
+                        updater.command_build(SimpleNamespace(
+                            provenance="provenance.json", response="response.json", artifact="artifact"))
+                    reconstruct.assert_not_called()
+                self.assertFalse(Path("artifact").exists())
+                self.assertEqual(self.posts(), [])
+
     def test_build_load_apply_changes_exactly_two_files(self):
         candidate = self.build()
         self.assertEqual(updater.load_candidate("artifact"), candidate)
