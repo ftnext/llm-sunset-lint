@@ -464,15 +464,36 @@ class ReconstructionTests(unittest.TestCase):
             with self.subTest(raw=raw), self.assertRaises(updater.InvalidUpdate):
                 updater.read_model_data(raw)
 
-    def test_tests_preserve_existing_names_and_non_test_code_add_assertions(self):
+    def test_tests_preserve_existing_names_and_non_test_code_allow_unchanged(self):
+        updater.validate_tests(TESTS, TESTS)
         updater.validate_tests(TESTS, NEW_TESTS)
         for candidate in (
-            TESTS, NEW_TESTS.replace("test_existing", "test_renamed"),
+            NEW_TESTS.replace("test_existing", "test_renamed"),
             NEW_TESTS.replace("import pytest", "import os"),
             NEW_TESTS.replace("return value", "return None"),
             NEW_TESTS.replace("assert check(1, 0) == 1", "pass"),
             NEW_TESTS + '\nprint("side effect")\n',
             NEW_TESTS + '\ndef test_existing():\n    assert True\n',
+        ):
+            with self.subTest(candidate=candidate), self.assertRaises(updater.InvalidUpdate):
+                updater.validate_tests(TESTS, candidate)
+
+    def test_data_only_response_preserves_tests_and_still_requires_model_change(self):
+        generated = updater.reconstruct(self.original, response(tests=TESTS))
+        self.assertEqual(generated[updater.TESTS], TESTS)
+        self.assertEqual(updater.read_model_data(generated[updater.MODEL_DATA]),
+                         (response()["model_shutdowns"], {"new-model"}))
+        with self.assertRaisesRegex(updater.InvalidUpdate, "No semantic model data change"):
+            updater.reconstruct(self.original, response(
+                model_shutdowns={"old-model": "2026-10-20"}, earliest_shutdowns=[], tests=TESTS))
+
+    def test_allowing_unchanged_tests_does_not_allow_regression_edits(self):
+        for candidate in (
+            TESTS.replace("test_existing", "test_renamed"),
+            TESTS.replace("assert check(1, 0) == 1", "pass"),
+            TESTS.replace("assert check(1, 0) == 1", "assert True"),
+            TESTS.replace("import pytest", "import os"),
+            TESTS + '\nprint("side effect")\n',
         ):
             with self.subTest(candidate=candidate), self.assertRaises(updater.InvalidUpdate):
                 updater.validate_tests(TESTS, candidate)
@@ -562,12 +583,13 @@ def test_new_shutdown():
         original = {path: (root / path).read_text() for path in updater.FILES}
         models, earliest = updater.read_model_data(original[updater.MODEL_DATA])
         models["regression-new-model"] = "2030-01-01"
-        tests = original[updater.TESTS] + '\n\ndef test_new_fixed_shutdown():\n    assert check(\'MODEL = "regression-new-model"\', date(2030, 1, 1))[0][2].startswith("LSG001")\n'
+        tests = original[updater.TESTS]
         checker = (root / updater.CHECKER).read_bytes()
         generated = updater.reconstruct(original, response(
             model_shutdowns=models, earliest_shutdowns=sorted(earliest), tests=tests,
         ))
         self.assertNotIn(updater.CHECKER, generated)
+        self.assertEqual(generated[updater.TESTS], original[updater.TESTS])
         self.assertEqual((root / updater.CHECKER).read_bytes(), checker)
         self.assertEqual(updater.read_model_data(generated[updater.MODEL_DATA]), (models, earliest))
 
@@ -809,12 +831,12 @@ class ArtifactTests(RepositoryCase):
         self.provenance = provenance(self.values, self.base)
         models, earliest = updater.read_model_data(Path(updater.MODEL_DATA).read_text())
         models["regression-new-model"] = "2030-01-01"
-        tests = Path(updater.TESTS).read_text() + '\n\ndef test_generated_regression():\n    assert check(\'MODEL = "regression-new-model"\', date(2030, 1, 1))[0][2].startswith("LSG001")\n'
+        tests = Path(updater.TESTS).read_text()
         candidate = self.build(response(
             model_shutdowns=models, earliest_shutdowns=sorted(earliest), tests=tests,
         ))
         updater.command_apply(SimpleNamespace(artifact="artifact"))
-        self.assertEqual(set(self.git("diff", "--name-only").splitlines()), set(updater.FILES))
+        self.assertEqual(set(self.git("diff", "--name-only").splitlines()), {updater.MODEL_DATA})
         self.assertEqual(Path(updater.CHECKER).read_text(), CHECKER)
         self.assertEqual(Path(updater.TESTS).read_text(), tests)
         self.assertEqual(updater.read_model_data(Path(updater.MODEL_DATA).read_text()), (models, earliest))

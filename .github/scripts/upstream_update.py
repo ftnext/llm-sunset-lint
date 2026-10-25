@@ -528,7 +528,7 @@ def validate_tests(original, candidate):
     original_tree, old, _ = test_partition(original)
     tree, new, _ = test_partition(candidate)
     require(set(old) <= set(new), "Existing regression test names cannot be removed or renamed.")
-    require(set(new) - set(old), "At least one new regression test is required.")
+    # Data-only catalog updates reuse the existing tests (see PR #30).
     # Preserve all non-test statements, including imports and the shared helper,
     # byte-for-byte. Whitespace between top-level statements may be reformatted.
     def fixed_parts(text, module):
@@ -803,7 +803,7 @@ def command_publish(args):
         f"Review run: https://github.com/{repository}/actions/runs/{values['review_run_id']}\n"
         f"Pinned base: {provenance['base_sha']}\n"
         f"Generator model: {candidate['model']}\n\n"
-        "This draft changes only model_shutdowns.json and regression tests. "
+        "This draft updates model shutdown data; data-only updates reuse the existing tests. "
         "The candidate passed the isolated Python test matrix before publication. "
         "Please verify the retirement dates against the linked upstream source diff.\n"
     )

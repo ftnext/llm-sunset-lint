@@ -35,13 +35,21 @@ reliably start another workflow).
    overwrites an existing branch. Main may still advance after the final check;
    the PR always records its exact tested base for human review.
 
-The model can change only `model_shutdowns.json` and `tests/test_checker.py`.
+For data-only updates, the model changes `model_shutdowns.json` and returns
+`tests/test_checker.py` unchanged in the existing response schema. As established
+by PR #30, `test_model_data.py` automatically validates every bundled entry and
+checks that all models load; lifecycle behavior uses two fixed fixture models
+in `test_checker.py`. No model-specific tests need to be added. The test matrix
+still runs the complete existing suite. Changes requiring checker or test
+behavior changes are reported as ambiguous for manual handling.
 The helper validates dates and boolean earliest flags and renders JSON itself.
 `checker.py` is read-only prompt context and is excluded from candidate artifacts.
 Existing test structure (allowing factual literal updates) and non-test module
-code, including trusted JSON-driven parametrization, are preserved. New tests
-must add regression coverage using a narrow assertion-only language and literal
-parametrization. Existing decorators retain their trusted structure.
+code, including trusted JSON-driven parametrization, are preserved. Unchanged
+tests are accepted without requiring a new function. Any optional test edits
+still undergo the existing structural checks; new tests remain restricted to a
+narrow assertion-only language and literal parametrization. Existing decorators
+retain their trusted structure.
 The original issue body is not used as a prompt: the validated Git source diff
 provides the evidence. Passing tests is a publication gate, not proof that
 generated facts or tests are correct; the Draft PR requires review.
