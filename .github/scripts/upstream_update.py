@@ -41,6 +41,8 @@ REVIEW_WORKFLOW = ".github/workflows/review-upstream-markdown-changes.yml"
 ISSUE_TITLE = "Upstream Markdown sources changed"
 MAX_BYTES = 1_000_000
 MAX_RESPONSE_BYTES = 250_000
+MAX_EVENT_BYTES = 3_000_000
+MAX_EVENT_COUNT = 10_000
 MAX_CONTEXT_BYTES = 100_000
 SHA_RE = re.compile(r"[0-9a-f]{40}\Z")
 NUMBER_RE = re.compile(r"[1-9][0-9]{0,19}\Z")
@@ -648,6 +650,54 @@ def configured_model():
     return matched(os.environ.get("UPDATER_MODEL"), MODEL_RE, "updater model")
 
 
+def extract_response(raw, expected_model):
+    """Extract one unrendered final answer from a successful, tool-free CLI run."""
+    require(len(raw) <= MAX_EVENT_BYTES, "Copilot event stream is too large.")
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise InvalidUpdate(f"Invalid UTF-8 in Copilot events at byte {error.start}.") from error
+    lines = text.split("\n")
+    if lines[-1] == "":
+        lines.pop()
+    require(0 < len(lines) <= MAX_EVENT_COUNT, "Expected a bounded nonempty Copilot event stream.")
+    final_answers = []
+    results = []
+    for index, line in enumerate(lines, 1):
+        require(line.strip(), f"Empty Copilot event at line {index}.")
+        event = strict_json(line, label=f"Copilot event line {index}")
+        require(isinstance(event, dict) and isinstance(event.get("type"), str), "Invalid Copilot event.")
+        kind = event["type"]
+        require(kind != "session.error", "Copilot reported a session error.")
+        require(not kind.startswith("tool.execution_"), "Copilot unexpectedly executed a tool.")
+        if kind == "assistant.message":
+            data = event.get("data")
+            require(isinstance(data, dict), "Invalid Copilot assistant message.")
+            require(data.get("toolRequests", []) == [], "Copilot unexpectedly requested a tool.")
+            if data.get("phase") == "final_answer":
+                require(data.get("model") == expected_model, "Copilot final answer model differs from the configured model.")
+                final_answers.append(text_value(data.get("content"), "Copilot final answer", MAX_RESPONSE_BYTES))
+        elif kind == "result":
+            require(type(event.get("exitCode")) is int and event["exitCode"] == 0,
+                    "Copilot did not report successful completion.")
+            results.append(index)
+    require(results == [len(lines)], "Expected one terminal Copilot result event.")
+    require(len(final_answers) == 1, "Expected exactly one Copilot final answer.")
+    content = final_answers[0]
+    require(isinstance(strict_json(content, label="Copilot final answer"), dict),
+            "Copilot final answer must be a JSON object.")
+    return content
+
+
+def command_extract(args):
+    source = regular_path(args.events)
+    require(source.stat().st_size <= MAX_EVENT_BYTES, "Copilot event stream is too large.")
+    content = extract_response(source.read_bytes(), configured_model())
+    target = regular_path(args.output, exists=False)
+    require(not target.exists(), "Extracted response output must not already exist.")
+    target.write_text(content, encoding="utf-8")
+
+
 def command_build(args):
     provenance = validate_provenance(read_json(args.provenance))
     require(git("rev-parse", "HEAD") == provenance["base_sha"], "Build checkout differs from pinned base.")
@@ -781,12 +831,14 @@ def command_publish(args):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("validate", "prepare", "build", "apply", "publish"):
+    for name in ("validate", "prepare", "extract", "build", "apply", "publish"):
         command = commands.add_parser(name)
-        if name in {"validate", "prepare"}:
+        if name in {"validate", "prepare", "extract"}:
             command.add_argument("--output", required=True)
         if name in {"prepare", "build"}:
             command.add_argument("--provenance", required=True)
+        if name == "extract":
+            command.add_argument("--events", required=True)
         if name == "build":
             command.add_argument("--response", required=True)
         if name in {"build", "apply", "publish"}:

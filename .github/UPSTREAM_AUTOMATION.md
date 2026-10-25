@@ -16,7 +16,12 @@ reliably start another workflow).
    `NEEDS_UPDATE` artifact. Pin current main as the implementation base. Existing
    open or closed PRs for the issue/source branch are not updated or reopened.
 2. **Generate:** Copilot CLI 1.0.80, explicitly selecting `mai-code-1.1-flash`,
-   returns data with no available tools from an isolated temporary directory.
+   returns JSONL events with no available tools from an isolated temporary
+   directory. The helper extracts exactly one `final_answer` from the selected
+   model and requires one successful terminal `result`, with no session errors
+   or tool requests/executions. Commentary and reasoning never become candidate
+   data. JSONL bypasses the CLI's display rendering and line wrapping; the final
+   answer still passes the existing strict JSON and candidate validation.
    Only this step receives the Copilot token. Missing model access, ambiguity or
    invalid output stops the run; there is no fallback model or repair loop.
 3. **Test:** the reusable `testing.yml` overlays a validated artifact onto the
@@ -57,8 +62,9 @@ generated facts or tests are correct; the Draft PR requires review.
   reruns will not overwrite it.
 - A changed main or newer upstream snapshot stops the run. Dispatch a fresh
   review against the appropriate source commit after checking the open issue.
-- Generation or candidate-validation failures retain only raw `response.json` in
-  `upstream-generation-response` for three days. Treat it as untrusted data;
+- Generation, extraction or candidate-validation failures retain raw
+  `response.jsonl` and, when extraction succeeded, `response.json` in
+  `upstream-generation-response` for three days. Treat them as untrusted data;
   never execute its contents or pass it to the candidate publication path.
   Copilot home/cache and credentials are not included. Parser diagnostics name
   the input, byte count, exception type and available error position without

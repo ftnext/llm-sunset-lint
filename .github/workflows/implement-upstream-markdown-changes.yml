@@ -107,13 +107,19 @@ jobs:
           # Only this step receives the Copilot token; no generated code is run.
           timeout 10m copilot \
             --model "$UPDATER_MODEL" \
-            --silent --stream=off --no-auto-update \
+            --silent --stream=off --output-format=json --no-auto-update \
             --no-custom-instructions --no-experimental \
             --no-remote --no-remote-export --disable-builtin-mcps \
             --available-tools=ask_user --no-ask-user \
             -C "$RUNNER_TEMP/copilot-work" \
             -p "$(< "$RUNNER_TEMP/implementation-prompt.txt")" \
-            > "$RUNNER_TEMP/response.json"
+            > "$RUNNER_TEMP/response.jsonl"
+      - name: Extract final answer from Copilot events
+        id: extract
+        run: |
+          python .github/scripts/upstream_update.py extract \
+            --events "$RUNNER_TEMP/response.jsonl" \
+            --output "$RUNNER_TEMP/response.json"
       - name: Validate and package candidate as data
         id: build
         run: |
@@ -122,11 +128,13 @@ jobs:
             --response "$RUNNER_TEMP/response.json" \
             --artifact "$RUNNER_TEMP/candidate"
       - name: Preserve failed generation response for diagnosis
-        if: ${{ failure() && (steps.generate.outcome == 'failure' || steps.build.outcome == 'failure') }}
+        if: ${{ failure() && (steps.generate.outcome == 'failure' || steps.extract.outcome == 'failure' || steps.build.outcome == 'failure') }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: upstream-generation-response
-          path: ${{ runner.temp }}/response.json
+          path: |
+            ${{ runner.temp }}/response.jsonl
+            ${{ runner.temp }}/response.json
           if-no-files-found: warn
           retention-days: 3
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

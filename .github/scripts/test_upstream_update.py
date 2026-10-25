@@ -208,6 +208,7 @@ class InputTests(unittest.TestCase):
         cases = {
             "validate": ["--output", "provenance.json"],
             "prepare": ["--provenance", "provenance.json", "--output", "prompt.txt"],
+            "extract": ["--events", "response.jsonl", "--output", "response.json"],
             "build": ["--provenance", "provenance.json", "--response", "response.json", "--artifact", "artifact"],
             "apply": ["--artifact", "artifact"], "publish": ["--artifact", "artifact"],
         }
@@ -217,6 +218,113 @@ class InputTests(unittest.TestCase):
                 handler.assert_called_once()
             with self.subTest(missing=command), patch("sys.stderr", new=io.StringIO()), self.assertRaises(SystemExit):
                 updater.main([command])
+
+
+def copilot_events(content=None):
+    return [
+        {"type": "session.info", "data": {"message": "not an answer"}},
+        {"type": "assistant.message", "data": {"phase": "commentary", "content": "not JSON"}},
+        {"type": "assistant.message", "data": {
+            "phase": "final_answer", "model": MODEL, "toolRequests": [],
+            "content": json.dumps(response()) if content is None else content,
+        }},
+        {"type": "result", "exitCode": 0},
+    ]
+
+
+def event_bytes(events):
+    return ("\n".join(json.dumps(event) for event in events) + "\n").encode("utf-8")
+
+
+class EventExtractionTests(unittest.TestCase):
+    def test_preserves_long_json_strings_and_escapes_without_display_wrapping(self):
+        value = response(summary="長い説明" * 80)
+        content = json.dumps(value, ensure_ascii=False, indent=2)
+        self.assertEqual(updater.extract_response(event_bytes(copilot_events(content)), MODEL), content)
+        self.assertEqual(json.loads(content)["tests"], NEW_TESTS)
+
+    def test_requires_exactly_one_final_answer_from_the_configured_model(self):
+        events = copilot_events()
+        variants = [
+            [events[0], events[1], events[-1]],
+            [*events[:-1], events[-2], events[-1]],
+        ]
+        for changes in ({"model": "other-model"}, {"content": None}, {"phase": "commentary"}):
+            altered = deepcopy(events)
+            altered[-2]["data"].update(changes)
+            variants.append(altered)
+        for altered in variants:
+            with self.subTest(altered=altered), self.assertRaises(updater.InvalidUpdate):
+                updater.extract_response(event_bytes(altered), MODEL)
+
+    def test_requires_one_successful_terminal_result(self):
+        events = copilot_events()
+        variants = [events[:-1], events + [events[-1]], events + [events[0]]]
+        for exit_code in (1, False, None, "0"):
+            altered = deepcopy(events)
+            altered[-1]["exitCode"] = exit_code
+            variants.append(altered)
+        for altered in variants:
+            with self.subTest(altered=altered), self.assertRaises(updater.InvalidUpdate):
+                updater.extract_response(event_bytes(altered), MODEL)
+
+    def test_rejects_errors_and_tools_even_with_successful_final_and_result(self):
+        events = copilot_events()
+        for kind in ("session.error", "tool.execution_start", "tool.execution_complete", "tool.execution_partial_result"):
+            with self.subTest(kind=kind), self.assertRaises(updater.InvalidUpdate):
+                updater.extract_response(event_bytes([{"type": kind}, *events]), MODEL)
+        for requests in ([{"name": "bash"}], None, {}):
+            altered = deepcopy(events)
+            altered[1]["data"]["toolRequests"] = requests
+            with self.subTest(requests=requests), self.assertRaises(updater.InvalidUpdate):
+                updater.extract_response(event_bytes(altered), MODEL)
+
+    def test_does_not_repair_invalid_final_json_or_accept_non_object_answers(self):
+        for content in ("", "```json\n{}\n```", '{} {}', '{"x":1,"x":2}',
+                        '{"x":NaN}', '{"x":"line1\nline2"}', '[]', 'null'):
+            with self.subTest(content=content), self.assertRaises(updater.InvalidUpdate):
+                updater.extract_response(event_bytes(copilot_events(content)), MODEL)
+
+    def test_rejects_malformed_or_unbounded_event_streams(self):
+        valid = event_bytes(copilot_events())
+        for raw in (b'', b'\xff', b'not json\n' + valid, b'{}\n' + valid,
+                    b'[]\n' + valid, b'\n' + valid,
+                    b'{"type":"a","type":"b"}\n' + valid,
+                    b'{"type":"x","data":NaN}\n' + valid):
+            with self.subTest(raw=raw[:50]), self.assertRaises(updater.InvalidUpdate):
+                updater.extract_response(raw, MODEL)
+        with patch.object(updater, "MAX_EVENT_BYTES", len(valid) - 1), self.assertRaises(updater.InvalidUpdate):
+            updater.extract_response(valid, MODEL)
+        with patch.object(updater, "MAX_EVENT_COUNT", 2), self.assertRaises(updater.InvalidUpdate):
+            updater.extract_response(valid, MODEL)
+        with patch.object(updater, "MAX_RESPONSE_BYTES", 1), self.assertRaises(updater.InvalidUpdate):
+            updater.extract_response(valid, MODEL)
+        events = copilot_events()
+        events[-2]["data"] = []
+        with self.assertRaises(updater.InvalidUpdate):
+            updater.extract_response(event_bytes(events), MODEL)
+
+    def test_extract_command_writes_exact_content_and_preserves_existing_output(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"UPDATER_MODEL": MODEL}):
+            directory = Path(directory).resolve()
+            source, target = directory / "response.jsonl", directory / "response.json"
+            content = json.dumps(response(), ensure_ascii=False)
+            source.write_bytes(event_bytes(copilot_events(content)))
+            args = SimpleNamespace(events=str(source), output=str(target))
+            updater.command_extract(args)
+            self.assertEqual(target.read_text(), content)
+            with self.assertRaises(updater.InvalidUpdate):
+                updater.command_extract(args)
+            self.assertEqual(target.read_text(), content)
+
+    def test_invalid_events_never_create_output(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"UPDATER_MODEL": MODEL}):
+            directory = Path(directory).resolve()
+            source, target = directory / "response.jsonl", directory / "response.json"
+            source.write_bytes(event_bytes(copilot_events("broken JSON")))
+            with self.assertRaises(updater.InvalidUpdate):
+                updater.command_extract(SimpleNamespace(events=str(source), output=str(target)))
+            self.assertFalse(target.exists())
 
 
 class GitHubValidationTests(unittest.TestCase):
@@ -656,6 +764,17 @@ class SourceTests(RepositoryCase):
 
 
 class ArtifactTests(RepositoryCase):
+    def test_jsonl_extract_and_build_use_the_existing_candidate_validation(self):
+        updater.write_json("provenance.json", self.provenance)
+        Path("response.jsonl").write_bytes(event_bytes(copilot_events()))
+        updater.command_extract(SimpleNamespace(events="response.jsonl", output="response.json"))
+        updater.command_build(SimpleNamespace(
+            provenance="provenance.json", response="response.json", artifact="artifact"))
+        candidate = updater.load_candidate("artifact")
+        self.assertEqual(candidate["response"], response())
+        self.assertEqual(set(candidate["files"]), set(updater.FILES))
+        self.assertEqual(self.posts(), [])
+
     def test_malformed_response_never_builds_or_publishes_candidate(self):
         updater.write_json("provenance.json", self.provenance)
         for raw in (b'', b'```json\n{}\n```', b'{} {}', b'{"tests":"private\ntext"}'):

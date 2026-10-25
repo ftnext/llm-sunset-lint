@@ -58,13 +58,26 @@ class WorkflowIsolationTests(unittest.TestCase):
         diagnostic = diagnostic.split("      - uses:", 1)[0]
         self.assertIn("failure()", diagnostic)
         self.assertIn("steps.generate.outcome == 'failure'", diagnostic)
+        self.assertIn("steps.extract.outcome == 'failure'", diagnostic)
         self.assertIn("steps.build.outcome == 'failure'", diagnostic)
         self.assertIn("name: upstream-generation-response", diagnostic)
-        self.assertIn("path: ${{ runner.temp }}/response.json", diagnostic)
+        self.assertIn("${{ runner.temp }}/response.jsonl", diagnostic)
+        self.assertIn("${{ runner.temp }}/response.json\n", diagnostic)
         self.assertIn("retention-days: 3", diagnostic)
         self.assertNotIn("continue-on-error", workflow)
         self.assertNotIn("copilot-home/", diagnostic)
         self.assertNotIn("copilot-cache/", diagnostic)
+
+    def test_generator_extracts_jsonl_before_validating_and_packaging(self):
+        workflow = (WORKFLOWS / "implement-upstream-markdown-changes.yml").read_text()
+        generate = workflow.split("\n  generate:\n", 1)[1].split("\n  test:\n", 1)[0]
+        self.assertIn("--output-format=json", generate)
+        self.assertIn('> "$RUNNER_TEMP/response.jsonl"', generate)
+        self.assertIn('upstream_update.py extract', generate)
+        self.assertIn('--events "$RUNNER_TEMP/response.jsonl"', generate)
+        self.assertIn('--output "$RUNNER_TEMP/response.json"', generate)
+        self.assertLess(generate.index("upstream_update.py extract"), generate.index("upstream_update.py build"))
+        self.assertIn('--response "$RUNNER_TEMP/response.json"', generate)
 
     def test_publish_requires_successful_matrix_and_runs_only_trusted_helper(self):
         workflow = (WORKFLOWS / "implement-upstream-markdown-changes.yml").read_text()
