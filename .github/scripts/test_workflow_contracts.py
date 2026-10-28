@@ -98,7 +98,7 @@ class WorkflowIsolationTests(unittest.TestCase):
     def test_reusable_matrix_has_no_write_token_or_supplied_secrets(self):
         workflow = (WORKFLOWS / "testing.yml").read_text()
         self.assertIn("workflow_call:", workflow)
-        self.assertIn('python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]', workflow)
+        self.assertIn('python-version: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]', workflow)
         self.assertIn("fail-fast: false", workflow)
         self.assertIn("persist-credentials: false", workflow)
         self.assertIn("UPDATER_MODEL: ${{ inputs.candidate_model }}", workflow)
