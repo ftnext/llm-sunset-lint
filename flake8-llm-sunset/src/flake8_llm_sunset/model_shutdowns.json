@@ -80,11 +80,11 @@
     "earliest": false
   },
   "veo-3.1-generate-001": {
-    "shutdown_date": "2026-11-17",
+    "shutdown_date": "2027-05-04",
     "earliest": true
   },
   "veo-3.1-fast-generate-001": {
-    "shutdown_date": "2026-11-17",
+    "shutdown_date": "2027-05-04",
     "earliest": true
   },
   "veo-3.0-generate-001": {
@@ -222,5 +222,9 @@
   "imagen-4.0-ultra-generate-001": {
     "shutdown_date": "2026-06-30",
     "earliest": false
+  },
+  "gemini-omni-1.2-flash": {
+    "shutdown_date": "2027-11-05",
+    "earliest": true
   }
 }
