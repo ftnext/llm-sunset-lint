@@ -92,6 +92,8 @@ The following table lists models available for shorter terms:
 
 | Model ID | Release date | Retirement date | Replacement model ID |
 |---|---|---|---|
+| [`gemini-4-carbon`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/4-carbon.md.txt) | November 10, 2026 | No retirement date announced |   |
+| [`gemini-4-carbon-cyber-permissive`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/4-carbon.md.txt#cyber) | November 10, 2026 | No retirement date announced |   |
 | [`gemini-4-argon-cyber-permissive`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/4-argon.md.txt#cyber) | October 13, 2026 | No retirement date announced |   |
 | [`gemini-3.8-flash-cyber`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash-cyber.md.txt) | September 16, 2026 | No retirement date announced |   |
 | [`gemini-3.7-flash`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-7-flash.md.txt) | August 13, 2026 | January 28, 2027 | [`gemini-3.8-flash`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash.md.txt) |
